@@ -61,15 +61,32 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 
 /* ============================================================
-   RPG WINDOW (classic SNES black + white double border)
+   RPG WINDOW — PS1-era navy gradient + cyan inset border
    ============================================================ */
-.rpg-window { background: #0a0816; color: #fff;
-  border: 3px solid #fff; outline: 3px solid #0a0816; outline-offset: -6px;
-  position: relative; font-family: 'DotGothic16', monospace; line-height: 1.3; }
-.rpg-window.amber { background: #f5d878; color: #2a1a0a; border-color: #2a1a0a; outline-color: #f5d878; }
-.rpg-window.pink  { background: #ff5a8a; color: #fff; border-color: #fff; outline-color: #2a1a0a; }
-.rpg-window.blue  { background: #2050a0; color: #fff; border-color: #fff; outline-color: #2a1a0a; }
-.rpg-window.gold  { background: #ffba33; color: #2a1a0a; border-color: #2a1a0a; outline-color: #884028; }
+.rpg-window {
+  background: linear-gradient(180deg, #1a1a48 0%, #0a0820 100%);
+  color: #fff;
+  border: 2px solid #6acce8;
+  outline: 2px solid #0a0820; outline-offset: -4px;
+  position: relative; font-family: 'DotGothic16', monospace; line-height: 1.3;
+  box-shadow: inset 0 0 0 1px rgba(168,224,255,0.18), 0 2px 4px rgba(0,0,0,0.4);
+}
+.rpg-window.amber {
+  background: linear-gradient(180deg, #ffe888 0%, #c47018 100%);
+  color: #3a1a0a; border-color: #ffd040; outline-color: #884028;
+}
+.rpg-window.pink  {
+  background: linear-gradient(180deg, #ff8aae 0%, #c43868 100%);
+  color: #fff; border-color: #ffd0e0; outline-color: #884028;
+}
+.rpg-window.blue  {
+  background: linear-gradient(180deg, #4080d0 0%, #1a3068 100%);
+  color: #fff; border-color: #a8d4f8; outline-color: #0a1024;
+}
+.rpg-window.gold  {
+  background: linear-gradient(180deg, #ffe066 0%, #c47a18 100%);
+  color: #3a1a0a; border-color: #ffd040; outline-color: #884028;
+}
 
 /* ============================================================
    TOP HUD
@@ -89,8 +106,19 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .title-strip {
   text-align: center; padding: 4px 0 6px; z-index: 6;
   font-family: 'DotGothic16', monospace; color: #fff;
-  font-size: 18px; font-weight: 700; letter-spacing: 0.05em;
-  text-shadow: 2px 2px 0 #2a1a0a, -1px -1px 0 #ff5a8a, 1px -1px 0 #ff5a8a, -1px 1px 0 #ff5a8a, 1px 1px 0 #ff5a8a;
+  font-size: 20px; font-weight: 700; letter-spacing: 0.06em;
+  text-shadow:
+    2px 2px 0 #2a1a4a,
+    -1px -1px 0 #ff5a8a, 1px -1px 0 #ff5a8a, -1px 1px 0 #ff5a8a, 1px 1px 0 #ff5a8a,
+    0 0 12px rgba(255,180,220,0.7),
+    0 0 4px rgba(255,255,255,0.9);
+}
+.dialog-name {
+  color: #ffe066; font-size: 11px; margin-bottom: 4px;
+  text-shadow: 1px 1px 0 #2a1a0a, 0 0 6px rgba(255,224,102,0.5);
+}
+.rarity-strip {
+  text-shadow: 1px 1px 0 #2a1a0a, 0 0 8px rgba(255,255,255,0.4);
 }
 
 /* ============================================================
@@ -617,15 +645,39 @@ const BASE_PAL = {
 };
 
 // Default fur palette — overridden per breed
+// Updated for PS1-era 3-tone shading:
+//   '1' = darkest shadow on fur
+//   '2' = base fur color
+//   '3' = light fur highlight
+//   '4' = cream/face mask base
+//   '5' = cream shadow
+//   '6' = cream highlight
+//   '7' = ear inner pink (default)
+//   '8' = secondary marking color (e.g. white belly stripe)
+// Fixed across all dogs:
+//   'e' eye iris color
+//   'p' pupil (always dark)
+//   'w' eye white highlight
+//   'n' nose
+//   'b' mouth dark
+//   'r' blush
+//   't' tongue
 const DEFAULT_PAL = {
-  '1': '#e8a060',  // primary fur
-  '2': '#c87838',  // shading
-  '3': '#fff5e0',  // face/belly mask
-  '4': '#d4b896',  // ear inner / stripe
-  '5': '#2a1a0a',  // eye / nose
-  '6': '#ff9eb5',  // tongue / blush
-  '7': '#fff',     // highlight
-  '8': '#3a2418',  // mouth / shadow dark
+  '1': '#8a5028',  // fur darkest shadow
+  '2': '#c87838',  // fur base
+  '3': '#f0b878',  // fur light
+  '4': '#fff5e0',  // cream mask base
+  '5': '#e8d4b0',  // cream shadow
+  '6': '#fffaee',  // cream highlight
+  '7': '#ffb6c8',  // ear pink
+  '8': '#ffffff',  // belly white
+  'e': '#5a3a1a',  // eye iris
+  'p': '#0a0808',  // pupil
+  'w': '#ffffff',  // eye white highlight
+  'n': '#2a1a0a',  // nose
+  'b': '#2a1a0a',  // mouth dark
+  'r': '#ff8aae',  // blush
+  't': '#ff9eb5',  // tongue
 };
 
 /* Build a colormap from base + breed palette + extra overrides */
@@ -654,39 +706,43 @@ function gridToSVG(grid, palette, scale = 1, extraAttrs = '') {
    '5' eye, '6' tongue, '8' mouth shadow.
    ============================================================ */
 
-/* Standard: upright ears (shiba/chihuahua/pomeranian/akita) */
+/* Standard: upright ears (shiba/chihuahua/pomeranian/akita)
+   PS1-era 3-tone shading + anime eyes (eppwpe pattern)
+   1=darkest fur shadow, 2=base, 3=light, 4=cream, 5=cream shadow,
+   6=cream light, 7=ear inner pink, e=eye iris, p=pupil, w=eye sparkle,
+   n=nose, b=mouth dark, r=blush, t=tongue                              */
 const T_STANDARD = [
   '................................',
-  '.......#####.........#####......',
-  '......#22221#.......#22221#.....',
-  '......#21111#.......#21111#.....',
-  '.....#211114#.......#211114#....',
-  '.....#21111###.....##21111#.....',
-  '....#21111111##...##21111111#...',
-  '....#2111111111####1111111111#..',
-  '...#21111111333333333333111111#.',
-  '...#211111333333333333333311111#',
-  '..#2111133333333333333333333111#',
-  '..#21113333555333333555333333111',
-  '.#211133335553333335553333333311',
-  '.#21133333333333333333333333331#',
-  '.#21333333333333355333333333331#',
-  '.#21333666333335553333333333331#',
-  '.#21333666333333533333333333331#',
-  '.#21333333333333333333333333311#',
-  '.#21333333333666333333333333111#',
-  '.#21333333333666666333333333311#',
-  '.#21336633333333333333336633311#',
-  '.#21133663333333333333366333111#',
-  '..#21133333333333333333333331##.',
-  '..#21111333333333333333333311##.',
-  '...#211111111111111111111111#...',
-  '...#221111111111111111111111#...',
-  '....#22111111111111111111111##..',
-  '....#22221111111111111111111##..',
-  '.....##2222222222222222222###...',
-  '......###################.......',
   '................................',
+  '.....######..........######.....',
+  '....#122271#........#172221#....',
+  '....#122271#........#172221#....',
+  '....#122271#........#172221#....',
+  '....#122271##......##172221#....',
+  '...#1222233##......##3322221#...',
+  '..#1222233333########3333222221#',
+  '..#1223333344444444444433333221#',
+  '#112233334444444444444433332211#',
+  '#122333444455555555554444333221#',
+  '#122333444466666666664444333221#',
+  '#122333444eeee4444eeee444333221#',
+  '#122333444epwe4444ewpe444333221#',
+  '#122333444eeee4444eeee444333221#',
+  '#12333334446eee.......eee664433#',
+  '#12233334446666...rr...6666443#1',
+  '#12233334446666..nnnnn.6666443#1',
+  '#12233334466666r.nnbnn.r66443#1.',
+  '#12233334466666rr.bbb.rr66443#1.',
+  '#12233333444466666.bttb.66443#1.',
+  '#122222333344466666bttbb6643#1..',
+  '#11222233334444466666bb666443#..',
+  '.#11222233334444446666666644#1..',
+  '..#1122223333344444444444433#1..',
+  '..#11122222333333333333333322#..',
+  '...#1112222222333333333222222#..',
+  '....#1112222222222222222222#1...',
+  '.....##1111111111111111111##....',
+  '.......##################.......',
   '................................',
 ];
 
@@ -834,39 +890,56 @@ const T_LONG = [
   '................................',
 ];
 
+/* Legacy templates use old palette chars (1=light fur, 2=dark, 3=cream, 4=ear, 5=eye, 6=blush, 8=mouth).
+   Convert them to new palette chars at init so they render with the new 3-tone breed palettes. */
+function convertOldTemplate(grid) {
+  // Two-pass to avoid char collisions
+  const pass1 = { '1': 'B', '2': 'A', '3': '4', '4': '7', '5': 'e', '6': 'r', '8': 'b' };
+  const pass2 = { 'A': '1', 'B': '2' };
+  return grid.map(row => {
+    let r1 = '';
+    for (const c of row) r1 += (pass1[c] !== undefined ? pass1[c] : c);
+    let r2 = '';
+    for (const c of r1) r2 += (pass2[c] !== undefined ? pass2[c] : c);
+    return r2;
+  });
+}
+
 const BODIES = {
   standard: T_STANDARD,
-  floppy: T_FLOPPY,
-  fluffy: T_FLUFFY,
-  flat: T_FLAT,
-  long: T_LONG,
+  floppy: convertOldTemplate(T_FLOPPY),
+  fluffy: convertOldTemplate(T_FLUFFY),
+  flat: convertOldTemplate(T_FLAT),
+  long: convertOldTemplate(T_LONG),
 };
 
 /* ============================================================
    ==== SECTION 3: BREED PALETTES ===========================
    ============================================================ */
 
+// PS1-era 3-tone shading per breed.
+// 1 = shadow, 2 = base, 3 = light. 4 = cream mask, 5 = cream shadow, 6 = cream light.
+// Override 'e' eye iris per breed for color variation if desired.
 const BREEDS = {
-  shiba:        { 1: '#e8a060', 2: '#c87838', 3: '#fff5e0' },
-  mameshiba:    { 1: '#f0b878', 2: '#d49050', 3: '#fff8e0' },
-  blackshiba:   { 1: '#4a3a30', 2: '#2a1f1a', 3: '#d4a878' },
-  chihuahua:    { 1: '#f0c890', 2: '#d4a868', 3: '#fff8e8' },
-  pug:          { 1: '#e8c890', 2: '#b89058', 3: '#5a3818', 8: '#2a1808' },
-  bulldog:      { 1: '#f4d4b0', 2: '#c89858', 3: '#fff', 8: '#3a2418' },
-  frenchbull:   { 1: '#8a8078', 2: '#5a5048', 3: '#fff5e0', 8: '#2a2418' },
-  corgi:        { 1: '#e89c50', 2: '#b87030', 3: '#fff5e0' },
-  samoyed:      { 1: '#ffffff', 2: '#d8d4c8', 3: '#fff' },
-  beagle:       { 1: '#d49058', 2: '#3a2418', 3: '#fff5e0', 4: '#a06030' },
-  golden:       { 1: '#f4c880', 2: '#d4a850', 3: '#fff8e0' },
-  pomeranian:   { 1: '#f4a850', 2: '#c87018', 3: '#fff5d4' },
-  toypoodle:    { 1: '#e8c8a0', 2: '#b89058', 3: '#fff8e0' },
-  borderc:      { 1: '#1a1818', 2: '#000', 3: '#ffffff', 4: '#1a1818' },
-  shihtzu:      { 1: '#d4b890', 2: '#a08858', 3: '#fff8e0' },
-  dachshund:    { 1: '#a05828', 2: '#603018', 3: '#f4d4a8' },
-  akita:        { 1: '#f4c890', 2: '#c89058', 3: '#fff8e0' },
-  maltese:      { 1: '#ffffff', 2: '#e0d8c8', 3: '#fff' },
-  sammoth:      { 1: '#fff', 2: '#c8c0b8', 3: '#fff' },
-  welshcorgi:   { 1: '#d48838', 2: '#a05818', 3: '#fff5e0' },
+  shiba:        { 1: '#8a5028', 2: '#d48848', 3: '#f4c084', 4: '#fff5e0', 5: '#e0c898', 6: '#fffcef' },
+  mameshiba:    { 1: '#a06030', 2: '#e89e58', 3: '#ffd49a', 4: '#fffaee', 5: '#e8d4ae', 6: '#fff' },
+  blackshiba:   { 1: '#1a1208', 2: '#3a2818', 3: '#5a4030', 4: '#d4a878', 5: '#a87848', 6: '#e8c098' },
+  chihuahua:    { 1: '#a07840', 2: '#e8c084', 3: '#ffe0b0', 4: '#fff8e8', 5: '#e8d8b8', 6: '#fff', e: '#3a2810' },
+  pug:          { 1: '#6a3818', 2: '#b88858', 3: '#e8c890', 4: '#3a1f0a', 5: '#1a0a04', 6: '#5a3818' },
+  bulldog:      { 1: '#a07848', 2: '#e8c498', 3: '#fff0d4', 4: '#fff', 5: '#d8c8a8', 6: '#fff' },
+  frenchbull:   { 1: '#403830', 2: '#7a6e60', 3: '#a89880', 4: '#fff5e0', 5: '#c8b89a', 6: '#fff' },
+  corgi:        { 1: '#9a5818', 2: '#e89058', 3: '#ffb878', 4: '#fff5e0', 5: '#e8cca8', 6: '#fff' },
+  samoyed:      { 1: '#c8c0b0', 2: '#fff', 3: '#fff', 4: '#fff', 5: '#e8e0d0', 6: '#fff', n: '#1a0a04' },
+  beagle:       { 1: '#1a0a04', 2: '#3a2418', 3: '#a06038', 4: '#fff5e0', 5: '#d8b890', 6: '#fff', 7: '#a06030' },
+  golden:       { 1: '#a87838', 2: '#f4c074', 3: '#ffd498', 4: '#fff8e0', 5: '#e8d4ae', 6: '#fff' },
+  pomeranian:   { 1: '#a85820', 2: '#f0a048', 3: '#ffc878', 4: '#fff5d4', 5: '#e8d098', 6: '#fff' },
+  toypoodle:    { 1: '#9a7048', 2: '#d4b088', 3: '#f4d4b0', 4: '#fff8e0', 5: '#e8d8b8', 6: '#fff' },
+  borderc:      { 1: '#000', 2: '#1a1818', 3: '#3a3838', 4: '#fff', 5: '#d8d4d0', 6: '#fff' },
+  shihtzu:      { 1: '#7a5828', 2: '#c8a070', 3: '#e8c898', 4: '#fff8e0', 5: '#e8d4b0', 6: '#fff' },
+  dachshund:    { 1: '#3a1808', 2: '#7a3818', 3: '#a85828', 4: '#f4d4a8', 5: '#d4a878', 6: '#ffd4a0' },
+  akita:        { 1: '#9a6838', 2: '#e8b878', 3: '#ffd8a0', 4: '#fff8e0', 5: '#e8d4ae', 6: '#fff' },
+  maltese:      { 1: '#c8c0a8', 2: '#fff8e8', 3: '#fff', 4: '#fff', 5: '#e8e0c8', 6: '#fff', n: '#1a0a04' },
+  welshcorgi:   { 1: '#7a3818', 2: '#d47828', 3: '#ffa858', 4: '#fff5e0', 5: '#e8cca8', 6: '#fff' },
 };
 
 /* ============================================================
