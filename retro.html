@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#6db4ec">
+<title>ハズレ犬ガチャ - 人生に疲れた犬たちを集めよう</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   GLOBAL RESET + BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+html, body { width: 100%; height: 100%; overflow: hidden;
+  font-family: 'DotGothic16', monospace; background: #1a1a2a;
+  image-rendering: pixelated; -webkit-font-smoothing: none; touch-action: manipulation; }
+body { display: flex; align-items: center; justify-content: center; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+/* Stage: 9:16 portrait, scales with viewport */
+.stage {
+  position: relative; width: 100%; max-width: 440px; height: 100vh; height: 100dvh;
+  background: linear-gradient(180deg, #6db4ec 0%, #9bc8ec 55%, #c8e0c8 75%, #c8e0c8 100%);
+  overflow: hidden;
+}
+@media (min-aspect-ratio: 9/16) {
+  .stage { width: auto; height: 100vh; aspect-ratio: 9 / 16; }
+}
+
+/* ============================================================
+   BACKGROUND DECOR — sky / sun / clouds / hills / bricks
+   ============================================================ */
+.sky { position: absolute; top: 0; left: 0; right: 0; height: 26%; z-index: 1; pointer-events: none; }
+.cloud { position: absolute; }
+.cloud svg, .sun svg { display: block; }
+.sun { position: absolute; top: 16px; right: 14px; }
+
+.ground { position: absolute; left: 0; right: 0; bottom: 0; height: 14%; z-index: 1; pointer-events: none; }
+.hill { position: absolute; bottom: 28px; background: #5aaa3e; border-top: 4px solid #3a7a26;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0; box-shadow: inset 0 -6px 0 #4a8e30; }
+.bricks { position: absolute; left: 0; right: 0; bottom: 0; height: 28px; background: #c46838;
+  box-shadow: inset 0 4px 0 #884028, inset 0 -2px 0 #6a2a18; }
+.brick-row { position: absolute; left: 0; right: 0; height: 13px; display: flex; }
+.brick-row.top { top: 0; }
+.brick-row.bot { bottom: 0; padding-left: 6%; }
+.brick { flex: 1; border-right: 2px solid #3a1a08; height: 100%; }
+.brick-row.top { border-bottom: 2px solid #3a1a08; }
+
+/* ============================================================
+   APP CONTAINER + LAYOUT
+   ============================================================ */
+.app {
+  position: relative; z-index: 5; width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  padding: 10px 10px 12px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+/* ============================================================
+   RPG WINDOW (classic SNES black + white double border)
+   ============================================================ */
+.rpg-window { background: #0a0816; color: #fff;
+  border: 3px solid #fff; outline: 3px solid #0a0816; outline-offset: -6px;
+  position: relative; font-family: 'DotGothic16', monospace; line-height: 1.3; }
+.rpg-window.amber { background: #f5d878; color: #2a1a0a; border-color: #2a1a0a; outline-color: #f5d878; }
+.rpg-window.pink  { background: #ff5a8a; color: #fff; border-color: #fff; outline-color: #2a1a0a; }
+.rpg-window.blue  { background: #2050a0; color: #fff; border-color: #fff; outline-color: #2a1a0a; }
+.rpg-window.gold  { background: #ffba33; color: #2a1a0a; border-color: #2a1a0a; outline-color: #884028; }
+
+/* ============================================================
+   TOP HUD
+   ============================================================ */
+.hud { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 6px; z-index: 6; }
+.hud .chip { padding: 5px 6px; font-size: 11px; text-align: center;
+  display: flex; align-items: center; justify-content: center; gap: 4px; min-height: 30px; }
+.hud .chip .ico {
+  width: 14px; height: 14px; background: #ffe066; border: 2px solid #2a1a0a;
+  color: #884028; font-family: 'Press Start 2P', monospace; font-size: 7px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.hud .chip.ptbg .ico { background: #ff9ec4; color: #882044; }
+.hud .chip.dxbg .ico { background: #a8d8ec; color: #2050a0; }
+.hud .num { color: #fff5d4; font-weight: 700; font-size: 12px; }
+.hud .amber .num { color: #2a1a0a; }
+
+.title-strip {
+  text-align: center; padding: 4px 0 6px; z-index: 6;
+  font-family: 'DotGothic16', monospace; color: #fff;
+  font-size: 18px; font-weight: 700; letter-spacing: 0.05em;
+  text-shadow: 2px 2px 0 #2a1a0a, -1px -1px 0 #ff5a8a, 1px -1px 0 #ff5a8a, -1px 1px 0 #ff5a8a, 1px 1px 0 #ff5a8a;
+}
+
+/* ============================================================
+   DOG STAGE
+   ============================================================ */
+.dog-stage {
+  flex: 1; padding: 10px 10px 8px; display: flex; flex-direction: column; align-items: center;
+  position: relative; min-height: 0; margin-bottom: 6px;
+}
+
+.rarity-strip {
+  padding: 2px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+  margin-bottom: 6px; border: 2px solid #fff; outline: 2px solid #2a1a0a; outline-offset: -4px;
+  text-shadow: 1px 1px 0 #2a1a0a; animation: rarityPulse 1.2s ease-in-out infinite;
+}
+@keyframes rarityPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.rarity-strip .star { color: #ffe066; text-shadow: 1px 1px 0 #884028; }
+
+.dog-frame {
+  width: 168px; height: 168px; max-width: 50vw; max-height: 50vw;
+  background: #c8e8b8; border: 4px solid #2a1a0a; outline: 3px solid #f5d878; outline-offset: -7px;
+  position: relative; margin: 2px 0 6px; box-shadow: 0 4px 0 #2a1a0a;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.dog-frame[data-bg="night"]  { background: #2a3060; outline-color: #5a3098; }
+.dog-frame[data-bg="dawn"]   { background: #f4c8a8; outline-color: #ff7a5a; }
+.dog-frame[data-bg="space"]  { background: #1a1838; outline-color: #b06ce8; }
+.dog-frame[data-bg="office"] { background: #c8c8c8; outline-color: #6a5a40; }
+.dog-frame[data-bg="sad"]    { background: #a8b8c8; outline-color: #5a6a80; }
+.dog-frame[data-bg="bar"]    { background: #5a2a18; outline-color: #ffba33; }
+
+.dog-art {
+  width: 88%; height: 88%; position: relative; z-index: 2;
+  image-rendering: pixelated; animation: dogIdle 1.6s steps(2) infinite;
+}
+@keyframes dogIdle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+/* Floating mood/effect emojis around dog */
+.fx-overlay { position: absolute; z-index: 5; pointer-events: none; }
+.fx-overlay.tl { top: 6%; left: 6%; }
+.fx-overlay.tr { top: 6%; right: 6%; }
+.fx-overlay.bl { bottom: 8%; left: 6%; }
+.fx-overlay.br { bottom: 8%; right: 6%; }
+.fx-overlay.float { animation: fxFloat 1.6s steps(2) infinite; }
+.fx-overlay.shake { animation: fxShake 0.4s steps(2) infinite; }
+@keyframes fxFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes fxShake { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-2px); } }
+
+/* Capsule machine (idle state) */
+.machine {
+  width: 70%; max-width: 220px; aspect-ratio: 220 / 280;
+  position: relative; animation: machineIdle 3s ease-in-out infinite;
+}
+.machine.shake { animation: machineShake 0.4s steps(2) infinite; }
+@keyframes machineIdle { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-4px) rotate(1deg); } }
+@keyframes machineShake { 0%, 100% { transform: translate(-6px, 0) rotate(-3deg); } 50% { transform: translate(6px, 0) rotate(3deg); } }
+.machine .globe { position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; aspect-ratio: 1; border-radius: 50%;
+  background: linear-gradient(160deg, rgba(255,200,220,0.6), rgba(180,220,240,0.6));
+  border: 5px solid #fff; box-shadow: inset 0 -8px 12px rgba(0,0,0,0.1); }
+.machine .globe::before {
+  content: ''; position: absolute; inset: 5%; border-radius: 50%;
+  background:
+    radial-gradient(circle 14px at 28% 60%, #ffd1e0 90%, transparent 91%),
+    radial-gradient(circle 12px at 55% 35%, #c5e4f3 90%, transparent 91%),
+    radial-gradient(circle 13px at 70% 65%, #fff5b8 90%, transparent 91%),
+    radial-gradient(circle 11px at 40% 80%, #d6c4f0 90%, transparent 91%);
+}
+.machine .base { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 95%; height: 28%; background: #ff5a8a; border: 4px solid #2a1a0a;
+  border-radius: 4px; box-shadow: inset 0 -4px 0 #c43868, 0 4px 0 #2a1a0a; }
+.machine .slot { position: absolute; bottom: 14%; left: 50%; transform: translateX(-50%);
+  width: 38%; height: 12%; background: #fdf6ee; border: 2px solid #2a1a0a; }
+.machine .knob { position: absolute; top: 76%; right: 12%; width: 18%; aspect-ratio: 1;
+  border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff 0%, #ffe066 60%, #ffba33 100%);
+  border: 2px solid #2a1a0a; }
+
+/* Flash + capsule burst */
+.flash {
+  position: absolute; inset: -10%; z-index: 7; opacity: 0;
+  background: radial-gradient(circle, var(--flash, #fff) 0%, transparent 60%);
+  pointer-events: none;
+}
+.flash.show { animation: flashIn 0.6s steps(3) forwards; }
+@keyframes flashIn { 0% { opacity: 0; transform: scale(0.5); }
+  40% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0; transform: scale(1.6); } }
+
+/* Name plate */
+.name-plate {
+  padding: 3px 12px; font-size: 13px; text-align: center;
+  background: #0a0816; color: #fff; border: 2px solid #fff;
+  outline: 2px solid #0a0816; outline-offset: -4px; margin-top: 2px;
+}
+.breed-tag { font-size: 10px; color: #ffe066; margin-top: 4px; letter-spacing: 0.05em; }
+
+/* ============================================================
+   DIALOG BOX
+   ============================================================ */
+.dialog-box {
+  padding: 8px 12px 8px; font-size: 13px; line-height: 1.45; min-height: 58px;
+  margin-bottom: 6px; position: relative;
+}
+.dialog-name { color: #ffe066; font-size: 11px; margin-bottom: 4px; }
+.dialog-text { color: #fff; }
+.dialog-text .hi { color: #ff9eb5; }
+.dialog-sub { color: #a0a0c0; font-size: 11px; margin-top: 3px; }
+.dialog-cursor {
+  position: absolute; bottom: 6px; right: 10px; width: 10px; height: 10px;
+  background: #ffe066; clip-path: polygon(0 0, 100% 0, 50% 100%);
+  animation: cursorBlink 0.6s steps(2) infinite;
+}
+@keyframes cursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* ============================================================
+   ACTION BUTTONS (chunky pixel 3D)
+   ============================================================ */
+.actions { display: grid; grid-template-columns: 2fr 2fr 1.2fr; gap: 6px; margin-bottom: 6px; }
+.actions-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pix-btn {
+  font-family: 'DotGothic16', monospace; font-weight: 700; font-size: 14px;
+  padding: 8px 4px 10px; color: #fff; position: relative;
+  text-shadow: 1px 1px 0 #2a1a0a; letter-spacing: 0.05em; line-height: 1.1;
+  background: #ff5a8a;
+  box-shadow: 0 0 0 3px #2a1a0a, inset 3px 3px 0 #ff9bbb, inset -3px -3px 0 #c43868, 0 5px 0 #2a1a0a;
+  transition: transform 0.05s steps(1), box-shadow 0.05s steps(1);
+}
+.pix-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 3px #2a1a0a, inset 3px 3px 0 #c43868, inset -3px -3px 0 #ff9bbb, 0 2px 0 #2a1a0a;
+}
+.pix-btn:disabled { opacity: 0.55; filter: grayscale(0.5); }
+.pix-btn .price { display: block; font-size: 9px; margin-top: 2px; color: #ffe066;
+  text-shadow: 1px 1px 0 #2a1a0a; }
+.pix-btn .arrow { display: inline-block; color: #ffe066; margin-right: 3px;
+  animation: arrowPulse 0.8s steps(2) infinite; }
+@keyframes arrowPulse { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(2px); } }
+.pix-btn.blue { background: #5aa8e8; text-shadow: 1px 1px 0 #2050a0;
+  box-shadow: 0 0 0 3px #2a1a0a, inset 3px 3px 0 #9bc8f5, inset -3px -3px 0 #3878c4, 0 5px 0 #2a1a0a; }
+.pix-btn.blue:active { box-shadow: 0 0 0 3px #2a1a0a, inset 3px 3px 0 #3878c4, inset -3px -3px 0 #9bc8f5, 0 2px 0 #2a1a0a; }
+.pix-btn.green { background: #5aaa3e; text-shadow: 1px 1px 0 #2a5a18;
+  box-shadow: 0 0 0 3px #2a1a0a, inset 3px 3px 0 #8ad068, inset -3px -3px 0 #3a7a26, 0 5px 0 #2a1a0a; }
+.pix-btn.green:active { box-shadow: 0 0 0 3px #2a1a0a, inset 3px 3px 0 #3a7a26, inset -3px -3px 0 #8ad068, 0 2px 0 #2a1a0a; }
+.pix-btn.gold { background: #ffba33; color: #2a1a0a; text-shadow: 1px 1px 0 #fff5b8;
+  box-shadow: 0 0 0 3px #2a1a0a, inset 3px 3px 0 #ffdf78, inset -3px -3px 0 #c47a18, 0 5px 0 #2a1a0a; }
+.pix-btn.gold:active { box-shadow: 0 0 0 3px #2a1a0a, inset 3px 3px 0 #c47a18, inset -3px -3px 0 #ffdf78, 0 2px 0 #2a1a0a; }
+.pix-btn.gold .price { color: #884028; text-shadow: 1px 1px 0 #fff5b8; }
+.pix-btn.purple { background: #a05ad8; text-shadow: 1px 1px 0 #501880;
+  box-shadow: 0 0 0 3px #2a1a0a, inset 3px 3px 0 #c890e8, inset -3px -3px 0 #6028a8, 0 5px 0 #2a1a0a; }
+.pix-btn.purple:active { box-shadow: 0 0 0 3px #2a1a0a, inset 3px 3px 0 #6028a8, inset -3px -3px 0 #c890e8, 0 2px 0 #2a1a0a; }
+
+/* ============================================================
+   SE TEXT (sound effect text bursts)
+   ============================================================ */
+.se-text {
+  position: absolute; z-index: 30; pointer-events: none;
+  font-family: 'DotGothic16', monospace; font-weight: 700;
+  color: #ffe066; font-size: 22px; text-shadow: 2px 2px 0 #2a1a0a, -1px -1px 0 #2a1a0a;
+  animation: seBurst 0.9s steps(4) forwards;
+}
+@keyframes seBurst {
+  0% { transform: translate(-50%, -50%) scale(0.3) rotate(-12deg); opacity: 0; }
+  25% { transform: translate(-50%, -50%) scale(1.4) rotate(8deg); opacity: 1; }
+  60% { transform: translate(-50%, -50%) scale(1) rotate(-3deg); opacity: 1; }
+  100% { transform: translate(-50%, -120%) scale(0.9) rotate(0); opacity: 0; }
+}
+
+/* Sparkle pixel particles */
+.sparkle {
+  position: absolute; width: 6px; height: 6px; background: #ffe066;
+  box-shadow: 0 0 0 2px #fff, 0 5px 0 #ffe066, 0 -5px 0 #ffe066, 5px 0 0 #ffe066, -5px 0 0 #ffe066;
+  pointer-events: none; z-index: 25; animation: sparkleFade 0.9s steps(4) forwards;
+}
+@keyframes sparkleFade { 0% { opacity: 1; transform: scale(0.6); } 100% { opacity: 0; transform: scale(1.4); } }
+
+/* Banner */
+.banner {
+  position: absolute; top: 26%; left: 50%; transform: translate(-50%, -50%) scale(0);
+  background: #ffe066; color: #2a1a0a; border: 3px solid #2a1a0a;
+  outline: 3px solid #ffe066; outline-offset: -6px; padding: 8px 18px;
+  font-size: 13px; font-weight: 700; z-index: 35; white-space: nowrap; opacity: 0;
+  text-shadow: 1px 1px 0 #fff; box-shadow: 0 6px 0 #2a1a0a;
+}
+.banner.show { animation: bannerPop 2s steps(2) forwards; }
+@keyframes bannerPop {
+  0%   { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
+  15%  { transform: translate(-50%, -50%) scale(1.15) rotate(-3deg); opacity: 1; }
+  30%  { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+  80%  { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+  100% { transform: translate(-50%, -90%) scale(0.95); opacity: 0; }
+}
+
+/* ============================================================
+   MODALS (Dex / Pet shop / Daily / Detail)
+   ============================================================ */
+.modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200;
+  display: flex; align-items: center; justify-content: center; padding: 14px;
+  animation: modalFadeIn 0.2s steps(2) both;
+}
+@keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal[hidden] { display: none; }
+.modal-card {
+  background: #0a0816; color: #fff; border: 3px solid #fff;
+  outline: 3px solid #0a0816; outline-offset: -6px;
+  width: 100%; max-width: 420px; max-height: 88vh;
+  display: flex; flex-direction: column; padding: 14px 12px 12px;
+}
+.modal-title {
+  text-align: center; font-size: 16px; color: #ffe066;
+  margin-bottom: 4px; letter-spacing: 0.06em;
+}
+.modal-sub {
+  text-align: center; font-size: 11px; color: #a0a0c0; margin-bottom: 8px;
+}
+.modal-actions { display: flex; gap: 8px; margin-top: 10px; }
+.modal-actions .pix-btn { flex: 1; font-size: 13px; padding: 8px 4px 10px; }
+
+/* Dex */
+.dex-meta {
+  background: #f5d878; color: #2a1a0a; border: 2px solid #2a1a0a;
+  padding: 4px 8px; font-size: 11px; display: flex; justify-content: space-between;
+  margin-bottom: 8px; font-weight: 700;
+}
+.dex-meta b { color: #c43838; }
+.dex-grid {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 2px;
+}
+.dex-cell {
+  aspect-ratio: 1; background: #2a2030; border: 2px solid #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 2px; font-size: 8px; color: #fff; cursor: pointer; position: relative;
+  font-family: 'DotGothic16', monospace;
+}
+.dex-cell.found.r-N      { background: #3a4050; border-color: #a8b0c0; }
+.dex-cell.found.r-R      { background: #2a4060; border-color: #5aa8e8; }
+.dex-cell.found.r-SR     { background: #503060; border-color: #b48cf2; }
+.dex-cell.found.r-SSR    { background: #604020; border-color: #ffc14d; }
+.dex-cell.found.r-UR     { background: #602020; border-color: #ff5a3a; box-shadow: 0 0 0 1px #ffe066 inset; }
+.dex-cell.locked { color: #5a4a68; }
+.dex-cell .dex-art {
+  width: 32px; height: 32px; image-rendering: pixelated; margin-bottom: 1px;
+}
+.dex-cell .dex-art img, .dex-cell .dex-art svg {
+  width: 100%; height: 100%; image-rendering: pixelated;
+}
+.dex-cell.locked .dex-art { filter: brightness(0.2) contrast(1.2); }
+.dex-cell .dex-name { font-size: 8px; line-height: 1.1; text-align: center;
+  overflow: hidden; max-height: 22px; }
+.dex-cell .dex-rarity {
+  position: absolute; top: 1px; left: 1px;
+  font-family: 'Press Start 2P', monospace; font-size: 6px; font-weight: 700;
+  padding: 1px 3px; color: #fff; background: #888;
+}
+.dex-cell .dex-rarity.N   { background: #708090; }
+.dex-cell .dex-rarity.R   { background: #3a78c4; }
+.dex-cell .dex-rarity.SR  { background: #8a4dd8; }
+.dex-cell .dex-rarity.SSR { background: #ffba33; color: #2a1a0a; }
+.dex-cell .dex-rarity.UR  { background: #ff3a3a; }
+.dex-cell .dex-count {
+  position: absolute; bottom: 1px; right: 1px;
+  font-family: 'Press Start 2P', monospace; font-size: 6px;
+  padding: 1px 2px; background: #ffe066; color: #2a1a0a;
+}
+
+/* Detail */
+.detail-card {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 0;
+}
+.detail-frame { width: 128px; height: 128px; }
+.detail-info {
+  background: #f5d878; color: #2a1a0a; border: 2px solid #2a1a0a;
+  padding: 4px 8px; width: 100%; font-size: 11px; line-height: 1.5;
+}
+.detail-info b { color: #c43838; }
+
+/* Daily bonus */
+.daily-display {
+  text-align: center; padding: 10px;
+}
+.daily-display .big {
+  font-size: 26px; color: #ffe066; font-weight: 700;
+  text-shadow: 2px 2px 0 #884028;
+  animation: bigPulse 0.8s steps(2) infinite;
+}
+@keyframes bigPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+.daily-streak { font-size: 11px; color: #a0a0c0; margin-top: 6px; }
+.daily-streak b { color: #ff9eb5; }
+
+/* Shop (なでなで交換) */
+.shop-item {
+  background: #1a1828; border: 2px solid #ff9ec4; padding: 6px 8px;
+  display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+}
+.shop-item .shop-art { width: 40px; height: 40px; flex-shrink: 0; background: #c8e8b8;
+  border: 2px solid #2a1a0a; display: flex; align-items: center; justify-content: center; }
+.shop-item .shop-info { flex: 1; font-size: 11px; line-height: 1.3; }
+.shop-item .shop-info .nm { font-weight: 700; color: #ffe066; font-size: 12px; }
+.shop-item .shop-info .ds { color: #c0c0d0; font-size: 10px; }
+.shop-item .shop-cost { font-size: 11px; color: #ff9ec4; font-weight: 700; }
+.shop-item .shop-buy { font-size: 10px; padding: 4px 6px 6px; }
+.shop-item.locked .shop-info .nm { color: #888; }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast {
+  position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+  background: #0a0816; color: #fff; border: 2px solid #fff;
+  padding: 6px 12px; font-size: 12px; z-index: 300; pointer-events: none;
+  animation: toastIn 0.3s steps(2), toastOut 0.3s steps(2) 2.2s forwards;
+  white-space: nowrap;
+}
+@keyframes toastIn { from { transform: translate(-50%, 24px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+@keyframes toastOut { to { transform: translate(-50%, 24px); opacity: 0; } }
+
+/* Subtle CRT effect */
+.scanline { position: absolute; inset: 0; pointer-events: none; z-index: 100;
+  background: linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.08)); opacity: 0.35; }
+
+/* Pixelated rendering */
+svg { image-rendering: pixelated; }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <!-- Sky decor -->
+  <div class="sky">
+    <div class="sun">
+      <svg width="40" height="40" viewBox="0 0 16 16" shape-rendering="crispEdges">
+        <rect x="6" y="2" width="4" height="1" fill="#2a1a0a"/><rect x="4" y="3" width="8" height="1" fill="#2a1a0a"/>
+        <rect x="3" y="4" width="1" height="8" fill="#2a1a0a"/><rect x="12" y="4" width="1" height="8" fill="#2a1a0a"/>
+        <rect x="4" y="12" width="8" height="1" fill="#2a1a0a"/><rect x="6" y="13" width="4" height="1" fill="#2a1a0a"/>
+        <rect x="4" y="4" width="8" height="8" fill="#ffe066"/>
+        <rect x="3" y="5" width="1" height="6" fill="#ffe066"/><rect x="12" y="5" width="1" height="6" fill="#ffe066"/>
+        <rect x="5" y="3" width="6" height="1" fill="#ffe066"/><rect x="5" y="12" width="6" height="1" fill="#ffe066"/>
+        <rect x="5" y="5" width="2" height="2" fill="#fff5b8"/>
+        <rect x="6" y="7" width="1" height="1" fill="#2a1a0a"/><rect x="9" y="7" width="1" height="1" fill="#2a1a0a"/>
+        <rect x="7" y="9" width="2" height="1" fill="#2a1a0a"/>
+        <rect x="5" y="9" width="1" height="1" fill="#ff9eb5"/><rect x="10" y="9" width="1" height="1" fill="#ff9eb5"/>
+      </svg>
+    </div>
+    <div class="cloud" style="top: 10px; left: 14px;">
+      <svg width="40" height="20" viewBox="0 0 20 10" shape-rendering="crispEdges">
+        <rect x="3" y="2" width="14" height="6" fill="#fff"/><rect x="1" y="4" width="18" height="2" fill="#fff"/>
+        <rect x="3" y="6" width="14" height="2" fill="#d4e8f0"/>
+      </svg>
+    </div>
+    <div class="cloud" style="top: 50px; left: 56%;">
+      <svg width="52" height="22" viewBox="0 0 26 11" shape-rendering="crispEdges">
+        <rect x="4" y="2" width="18" height="7" fill="#fff"/><rect x="2" y="4" width="22" height="3" fill="#fff"/>
+        <rect x="4" y="7" width="18" height="2" fill="#d4e8f0"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Ground decor -->
+  <div class="ground">
+    <div class="hill" style="left: -10%; width: 50%; height: 40px;"></div>
+    <div class="hill" style="left: 38%; width: 56%; height: 48px;"></div>
+    <div class="hill" style="right: -8%; width: 40%; height: 36px;"></div>
+    <div class="bricks">
+      <div class="brick-row top"><div class="brick"></div><div class="brick"></div><div class="brick"></div><div class="brick"></div><div class="brick"></div><div class="brick"></div><div class="brick"></div><div class="brick"></div></div>
+      <div class="brick-row bot"><div class="brick"></div><div class="brick"></div><div class="brick"></div><div class="brick"></div><div class="brick"></div><div class="brick"></div><div class="brick"></div><div class="brick"></div></div>
+    </div>
+  </div>
+
+  <!-- App UI -->
+  <div class="app">
+    <!-- Title -->
+    <div class="title-strip">ハズレ犬ガチャ</div>
+
+    <!-- HUD -->
+    <div class="hud">
+      <div class="rpg-window amber chip"><span class="ico">¥</span><span class="num" id="coinVal">3000</span></div>
+      <div class="rpg-window chip dxbg"><span class="ico">D</span><span class="num"><span id="dexVal">0</span>/30</span></div>
+      <div class="rpg-window chip ptbg"><span class="ico">P</span><span class="num" id="petVal">0</span></div>
+    </div>
+
+    <!-- Dog stage -->
+    <div class="rpg-window dog-stage" id="dogStage">
+      <div class="rarity-strip" id="rarityStrip">
+        <span class="star">★</span> ハズレずかんへようこそ <span class="star">★</span>
+      </div>
+
+      <div class="dog-frame" id="dogFrame">
+        <!-- Either machine (idle) or dog art (after pull) -->
+        <div class="machine" id="machine">
+          <div class="globe"></div>
+          <div class="base"></div>
+          <div class="slot"></div>
+          <div class="knob"></div>
+        </div>
+        <div class="flash" id="flash"></div>
+      </div>
+
+      <div class="name-plate" id="namePlate">
+        <span id="dogName">─── ガチャを引いてね ───</span>
+      </div>
+      <div class="breed-tag" id="breedTag">▼ さあ、人生に疲れた犬に会いに行こう</div>
+    </div>
+
+    <!-- Dialog -->
+    <div class="rpg-window dialog-box" id="dialogBox">
+      <div class="dialog-name" id="dialogSpeaker">▼ おしらせ</div>
+      <div class="dialog-text" id="dialogText">
+        いらっしゃい！<span class="hi">「ハズレ犬」</span>ばかりが集まる<br>
+        ちょっと変なガチャマシンへ。
+      </div>
+      <div class="dialog-sub" id="dialogSub">───── 何故か愛着が湧く犬たち ─────</div>
+      <div class="dialog-cursor"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="pix-btn" id="pull1Btn"><span class="arrow">▶</span>ガチャ<span class="price">100¥</span></button>
+      <button class="pix-btn blue" id="pull10Btn"><span class="arrow">▶</span>10連<span class="price">900¥</span></button>
+      <button class="pix-btn gold" id="dailyBtn">毎日<span class="price" id="dailyLabel">+500</span></button>
+    </div>
+    <div class="actions-row2">
+      <button class="pix-btn green" id="dexBtn"><span class="arrow">▶</span>ハズレずかん</button>
+      <button class="pix-btn purple" id="shopBtn"><span class="arrow">▶</span>なでなで交換</button>
+    </div>
+  </div>
+
+  <!-- Banner -->
+  <div class="banner" id="banner">ハズレ…のはずが、かわいすぎる！</div>
+  <!-- CRT -->
+  <div class="scanline"></div>
+</div>
+
+<!-- ========================== MODALS ========================== -->
+
+<!-- Dex modal -->
+<div class="modal" id="dexModal" hidden>
+  <div class="modal-card">
+    <div class="modal-title">▼ ハズレずかん</div>
+    <div class="modal-sub">人生に疲れた犬たちの記録</div>
+    <div class="dex-meta">
+      <span>進捗：<b><span id="dexCount">0</span> / 30 匹</b></span>
+      <span>コンプ率：<b><span id="dexPct">0%</span></b></span>
+    </div>
+    <div class="dex-grid" id="dexGrid"></div>
+    <div class="modal-actions">
+      <button class="pix-btn blue" id="closeDexBtn">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail modal -->
+<div class="modal" id="detailModal" hidden>
+  <div class="modal-card">
+    <div class="modal-title" id="detailTitle">犬の詳細</div>
+    <div class="detail-card">
+      <div class="dog-frame detail-frame" id="detailFrame"></div>
+      <div class="rarity-strip" id="detailRarity"></div>
+      <div class="detail-info" id="detailInfo"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="pix-btn blue" id="closeDetailBtn">もどる</button>
+      <button class="pix-btn green" id="shareBtn">📋 SNS共有</button>
+    </div>
+  </div>
+</div>
+
+<!-- Daily bonus modal -->
+<div class="modal" id="dailyModal" hidden>
+  <div class="modal-card">
+    <div class="modal-title">▼ ログインボーナス</div>
+    <div class="daily-display">
+      <div class="big" id="dailyAmount">+500¥</div>
+      <div class="daily-streak">連続ログイン <b id="streakNum">1</b> 日目</div>
+      <div class="daily-streak" id="dailyMsg" style="margin-top:8px;">明日も会いに来てね！</div>
+    </div>
+    <div class="modal-actions">
+      <button class="pix-btn gold" id="claimDailyBtn">▶ うけとる</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shop modal -->
+<div class="modal" id="shopModal" hidden>
+  <div class="modal-card">
+    <div class="modal-title">▼ なでなで交換所</div>
+    <div class="modal-sub">ダブった犬のなでなでポイントで限定犬を解放</div>
+    <div class="dex-meta">
+      <span>所持 <b><span id="shopPetPts">0</span> なでP</b></span>
+      <span><b>限定犬 入荷中</b></span>
+    </div>
+    <div id="shopList" style="overflow-y:auto;flex:1;"></div>
+    <div class="modal-actions">
+      <button class="pix-btn blue" id="closeShopBtn">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- 10-pull result modal -->
+<div class="modal" id="tenModal" hidden>
+  <div class="modal-card">
+    <div class="modal-title" id="tenTitle">▼ 10連の結果</div>
+    <div class="modal-sub" id="tenSub">どの子も…なんか愛しい</div>
+    <div class="dex-grid" id="tenGrid" style="grid-template-columns:repeat(5,1fr);flex:0;max-height:340px;"></div>
+    <div class="modal-actions">
+      <button class="pix-btn" id="closeTenBtn">うける</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   ==== SECTION 1: PIXEL ART RENDERING SYSTEM ===============
+   Char → color mapping. Templates use semantic chars (1,2,3...)
+   so palette swap works per-breed.
+   ============================================================ */
+
+// Base palette (chars common across all templates)
+const BASE_PAL = {
+  '.': null,           // transparent
+  '#': '#1a0f08',      // black outline (always)
+  ' ': null,
+};
+
+// Default fur palette — overridden per breed
+const DEFAULT_PAL = {
+  '1': '#e8a060',  // primary fur
+  '2': '#c87838',  // shading
+  '3': '#fff5e0',  // face/belly mask
+  '4': '#d4b896',  // ear inner / stripe
+  '5': '#2a1a0a',  // eye / nose
+  '6': '#ff9eb5',  // tongue / blush
+  '7': '#fff',     // highlight
+  '8': '#3a2418',  // mouth / shadow dark
+};
+
+/* Build a colormap from base + breed palette + extra overrides */
+function buildPalette(...overrides) {
+  return Object.assign({}, BASE_PAL, DEFAULT_PAL, ...overrides);
+}
+
+/* Convert a string-grid to SVG <rect>s */
+function gridToSVG(grid, palette, scale = 1, extraAttrs = '') {
+  const h = grid.length;
+  const w = grid[0].length;
+  let rects = '';
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const c = grid[y][x];
+      const col = palette[c];
+      if (col) rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="${col}"/>`;
+    }
+  }
+  return `<svg viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" ${extraAttrs}>${rects}</svg>`;
+}
+
+/* ============================================================
+   ==== SECTION 2: BODY TEMPLATE GRIDS ======================
+   Each is 32x32. Uses '1','2','3','4' for fur/mask colors,
+   '5' eye, '6' tongue, '8' mouth shadow.
+   ============================================================ */
+
+/* Standard: upright ears (shiba/chihuahua/pomeranian/akita) */
+const T_STANDARD = [
+  '................................',
+  '.......#####.........#####......',
+  '......#22221#.......#22221#.....',
+  '......#21111#.......#21111#.....',
+  '.....#211114#.......#211114#....',
+  '.....#21111###.....##21111#.....',
+  '....#21111111##...##21111111#...',
+  '....#2111111111####1111111111#..',
+  '...#21111111333333333333111111#.',
+  '...#211111333333333333333311111#',
+  '..#2111133333333333333333333111#',
+  '..#21113333555333333555333333111',
+  '.#211133335553333335553333333311',
+  '.#21133333333333333333333333331#',
+  '.#21333333333333355333333333331#',
+  '.#21333666333335553333333333331#',
+  '.#21333666333333533333333333331#',
+  '.#21333333333333333333333333311#',
+  '.#21333333333666333333333333111#',
+  '.#21333333333666666333333333311#',
+  '.#21336633333333333333336633311#',
+  '.#21133663333333333333366333111#',
+  '..#21133333333333333333333331##.',
+  '..#21111333333333333333333311##.',
+  '...#211111111111111111111111#...',
+  '...#221111111111111111111111#...',
+  '....#22111111111111111111111##..',
+  '....#22221111111111111111111##..',
+  '.....##2222222222222222222###...',
+  '......###################.......',
+  '................................',
+  '................................',
+];
+
+/* Floppy: long drooping ears (beagle/golden/dachshund/cavalier) */
+const T_FLOPPY = [
+  '................................',
+  '......#####.........#####.......',
+  '.....#22221#.......#22221#......',
+  '.....#21114#.......#21114#......',
+  '.....#21114#.......#21114#......',
+  '....#211114#########21111#......',
+  '....#2111111111111111111111#....',
+  '...#211111111333333333111111#...',
+  '...#21111133333333333333311111#.',
+  '..#211113333333333333333333311#.',
+  '..#21111333333333333333333331#1#',
+  '.#211433333355333335533333343111',
+  '.#21443333355533333555333344431#',
+  '.#214433333555333335553333344431',
+  '.#2143333333333333333333333344#.',
+  '.#2143333333333333553333333344#.',
+  '.#21443333333333355533333333443.',
+  '#214433366333333333333333666341.',
+  '#214433666333333333333333366443.',
+  '#2144333366333333333333366333431',
+  '#2144333333333666633333333333431',
+  '.#214433333333333333333333334#..',
+  '..#2143333333333333333333334#...',
+  '..#2143333333333333333333334#...',
+  '..#21433333333333333333333431#..',
+  '...#2222111111111111111111##....',
+  '....#2211111111111111111111#....',
+  '....#2221111111111111111111#....',
+  '.....#22222222222222222222##....',
+  '.......##################.......',
+  '................................',
+  '................................',
+];
+
+/* Fluffy: round puffball (samoyed/pomeranian/poodle/maltese) */
+const T_FLUFFY = [
+  '................................',
+  '............#######.............',
+  '..........##1111111##...........',
+  '.........#111111111111#.........',
+  '........#11111111111111#........',
+  '......##11111111111111111##.....',
+  '.....#11113333333333331111#.....',
+  '....#111133333333333333311111#..',
+  '....#11133333333333333333111#...',
+  '...#1133333555333335553333311#..',
+  '...#1133333555333335553333331#..',
+  '...#113333333333333333333333111#',
+  '..#113333333333333333333333331#.',
+  '..#113333333333555333333333331##',
+  '..#11333366333335553333333333111',
+  '..#1133366633333333333333666631.',
+  '..#1133333333333333333333333311.',
+  '..#11333333333333333333333333311',
+  '..#113366663333333333333366663#.',
+  '..#113336633333333333333366331#.',
+  '...#11333333333333333333333311#.',
+  '...#111133333333333333333333311.',
+  '...#1111133333333333333333331##.',
+  '....#11111133333333333333331##..',
+  '....#11111111111111111111111#...',
+  '.....##111111111111111111111#...',
+  '......##2222222222222222222##...',
+  '........###################.....',
+  '................................',
+  '................................',
+  '................................',
+  '................................',
+];
+
+/* Flat: squashed face (pug/bulldog/frenchie) */
+const T_FLAT = [
+  '................................',
+  '.....######.........######......',
+  '....#222221#.......#222221#.....',
+  '....#222211#.......#222211#.....',
+  '...#2222111#.......#2222111#....',
+  '...#22221111#####22221111#......',
+  '..#2221111111#####22221111111#..',
+  '..#221111111111111111111111111#.',
+  '.#22111111888888888888888881111#',
+  '.#2111118888888888888888888881#1',
+  '.#211118888888888888888888888#1#',
+  '.#21118888333333333333333388881#',
+  '.#21188883333355555533333888881#',
+  '.#21188333355555555555533388881#',
+  '.#218833335555533555553333888#1#',
+  '.#21833333355533335553333333881#',
+  '.#21833333335533335533333333881#',
+  '.#21833333333333333333333333881#',
+  '.#21888333366333333366333338881#',
+  '.#211888336666333336666338888881',
+  '.#2111888888333333338888888881#1',
+  '.#21118888888333338888888888#1#.',
+  '.#21111888888888888888888881#1#.',
+  '..#221111188888888888888881##...',
+  '..#2222211111111111111111##.....',
+  '...#222221111111111111111#......',
+  '...#222221111111111111111#......',
+  '....#22222222222222222222#......',
+  '.....####################.......',
+  '................................',
+  '................................',
+  '................................',
+];
+
+/* Long: dachshund/corgi style (long body, short legs) */
+const T_LONG = [
+  '................................',
+  '...##.................##........',
+  '..#22##..............#22##......',
+  '..#2221#.............#2221#.....',
+  '.#22211#.............#22211#....',
+  '.#22111#.....................#..',
+  '#221111####################1###.',
+  '#21111111111111111111111111111#.',
+  '#211113333333333333333333311111#',
+  '#21111333333333333333333333311#.',
+  '#11133333333333333333333333331#.',
+  '#11333335553333355333333333331#.',
+  '#11333355553333555533333333331#.',
+  '#11333333333333333333333333331#.',
+  '#11333333333355533333333333331#.',
+  '#11333333333555553333333333331#.',
+  '#11336333333335533333333333631#.',
+  '#11366333333333333333333336631#.',
+  '#11333333333333333333333333331#.',
+  '#11333333333366333333333333331#.',
+  '#11133333333666633333333333311#.',
+  '#11113333333333333333333333111#.',
+  '#21111111111111111111111111111#.',
+  '#22211111111111111111111111111#.',
+  '#22221111111111111111111111111#.',
+  '.#22222222222222222222222222#...',
+  '..#221111#####1111#####1111#....',
+  '..#11111#...#11111#...#11111#...',
+  '..######....#####.....#####.....',
+  '................................',
+  '................................',
+  '................................',
+];
+
+const BODIES = {
+  standard: T_STANDARD,
+  floppy: T_FLOPPY,
+  fluffy: T_FLUFFY,
+  flat: T_FLAT,
+  long: T_LONG,
+};
+
+/* ============================================================
+   ==== SECTION 3: BREED PALETTES ===========================
+   ============================================================ */
+
+const BREEDS = {
+  shiba:        { 1: '#e8a060', 2: '#c87838', 3: '#fff5e0' },
+  mameshiba:    { 1: '#f0b878', 2: '#d49050', 3: '#fff8e0' },
+  blackshiba:   { 1: '#4a3a30', 2: '#2a1f1a', 3: '#d4a878' },
+  chihuahua:    { 1: '#f0c890', 2: '#d4a868', 3: '#fff8e8' },
+  pug:          { 1: '#e8c890', 2: '#b89058', 3: '#5a3818', 8: '#2a1808' },
+  bulldog:      { 1: '#f4d4b0', 2: '#c89858', 3: '#fff', 8: '#3a2418' },
+  frenchbull:   { 1: '#8a8078', 2: '#5a5048', 3: '#fff5e0', 8: '#2a2418' },
+  corgi:        { 1: '#e89c50', 2: '#b87030', 3: '#fff5e0' },
+  samoyed:      { 1: '#ffffff', 2: '#d8d4c8', 3: '#fff' },
+  beagle:       { 1: '#d49058', 2: '#3a2418', 3: '#fff5e0', 4: '#a06030' },
+  golden:       { 1: '#f4c880', 2: '#d4a850', 3: '#fff8e0' },
+  pomeranian:   { 1: '#f4a850', 2: '#c87018', 3: '#fff5d4' },
+  toypoodle:    { 1: '#e8c8a0', 2: '#b89058', 3: '#fff8e0' },
+  borderc:      { 1: '#1a1818', 2: '#000', 3: '#ffffff', 4: '#1a1818' },
+  shihtzu:      { 1: '#d4b890', 2: '#a08858', 3: '#fff8e0' },
+  dachshund:    { 1: '#a05828', 2: '#603018', 3: '#f4d4a8' },
+  akita:        { 1: '#f4c890', 2: '#c89058', 3: '#fff8e0' },
+  maltese:      { 1: '#ffffff', 2: '#e0d8c8', 3: '#fff' },
+  sammoth:      { 1: '#fff', 2: '#c8c0b8', 3: '#fff' },
+  welshcorgi:   { 1: '#d48838', 2: '#a05818', 3: '#fff5e0' },
+};
+
+/* ============================================================
+   ==== SECTION 4: ACCESSORY SPRITES (small overlays) =======
+   Each accessory has art (small grid) + position ('tl','tr','bl','br','center')
+   ============================================================ */
+
+const ACC = {
+  // Sweat drop (sky blue)
+  sweat: { w: 6, h: 9, art: [
+    '..s...', '..s...', '.sst..', '.tst..', 'sttts.', 'stttts', 'sttts.', '.sss..', '......'
+  ], pal: { s: '#2a1a0a', t: '#6db4e0', a: '#a8d8ec' }},
+  // Z's (sleepy)
+  zzz: { w: 10, h: 8, art: [
+    '..zzzzz...', '.....z....', '....z.....', '...z......', '..zzzzz...', '..........', '......zzz.', '......z...'
+  ], pal: { z: '#fff' }, outline: '#2a1a0a' },
+  // Broken heart
+  broken_heart: { w: 10, h: 8, art: [
+    'rrr..rrr..', 'rwwrrwwr..', 'rwwwwww...', '.rwwwwr...', '..rwwr....', '...rr.....', '..........', '..........'
+  ], pal: { r: '#c43868', w: '#ff9eb5' }},
+  // Anger marks
+  anger: { w: 8, h: 6, art: [
+    '#.#..#.#', '##.##.##', '########', '##.##.##', '#.#..#.#', '........'
+  ], pal: { '#': '#c43838' }},
+  // Sake bottle
+  sake: { w: 8, h: 10, art: [
+    '..##....', '..##....', '.####...', '.gggg...', '.gggg...', 'ggggwg..', 'gggggg..', 'gggggg..', 'gggggg..', '.####...'
+  ], pal: { '#': '#2a1a0a', g: '#5aaa3e', w: '#fff' }},
+  // Phone w/ red alert
+  phone: { w: 8, h: 10, art: [
+    '########', '#bbbbbb#', '#brrrrr#', '#brrrrr#', '#bbbbbb#', '#wwwwww#', '#wbbbbw#', '#wbbbbw#', '#wwwwww#', '########'
+  ], pal: { '#': '#2a1a0a', b: '#3a78c4', w: '#fff', r: '#c43838' }},
+  // Empty wallet
+  wallet: { w: 9, h: 7, art: [
+    '#########', '#bbbbbbb#', '#bbbbbbb#', '#bbb#bbb#', '#bbbbbbb#', '#bbbbbbb#', '#########'
+  ], pal: { '#': '#2a1a0a', b: '#a06030' }},
+  // Necktie
+  tie: { w: 6, h: 10, art: [
+    '......', '..##..', '..##..', '.####.', '#####.', '.####.', '.####.', '.####.', '..##..', '..##..'
+  ], pal: { '#': '#c43838' }},
+  // Halo (UR)
+  halo: { w: 14, h: 5, art: [
+    '..yyyyyyyyyy..', '.y##########y.', 'y##yyyyyyyy##y', '.y##########y.', '..yyyyyyyyyy..'
+  ], pal: { y: '#ffe066', '#': '#fff' }},
+  // Lottery paper
+  lottery: { w: 10, h: 8, art: [
+    '##########', '#wwwwwwww#', '#wbwbwbww#', '#wwwwwwww#', '#wrwwwwww#', '#wwwwwwww#', '##########', '..........'
+  ], pal: { '#': '#2a1a0a', w: '#fff5e0', b: '#3a78c4', r: '#c43838' }},
+  // Glasses
+  glasses: { w: 14, h: 4, art: [
+    '.#####..#####.', '#bbbbb##bbbbb#', '#bbbbb##bbbbb#', '.#####..#####.'
+  ], pal: { '#': '#2a1a0a', b: '#a8d8ec' }},
+  // Cake
+  cake: { w: 9, h: 8, art: [
+    '....c....', '....c....', 'wwwwwwwww', 'wppppppww', 'wbbbbbbbw', 'wppppppww', 'wbbbbbbbw', 'wwwwwwwww'
+  ], pal: { c: '#c43838', w: '#fff', p: '#ff9eb5', b: '#a06848' }},
+  // Energy drink
+  energy: { w: 6, h: 10, art: [
+    '######', '#yyyy#', '#bbbb#', '#yEEy#', '#yEEy#', '#bbbb#', '#yyyy#', '#yyyy#', '#bbbb#', '######'
+  ], pal: { '#': '#2a1a0a', y: '#ffe066', b: '#3a78c4', E: '#fff' }},
+  // Resignation letter
+  resignation: { w: 9, h: 10, art: [
+    '#########', '#wwwwwww#', '#w#wwww##', '#wwwwww#.', '#w####w#.', '#wwwwww#.', '#w####w#.', '#wwwwww#.', '#wwwwww#.', '#########'
+  ], pal: { '#': '#2a1a0a', w: '#fff5e0' }},
+  // Space helmet (UR)
+  space_helmet: { w: 18, h: 18, art: [
+    '......######......', '.....#sssssss#....', '....#sssssssss#...', '...#sss11111sss#..', '..#ssss1ddd1ssss#.', '..#sss1ddddd1sss#.', '..#sss1ddddd1sss#.', '..#sss1ddddd1sss#.', '..#sss1ddddd1sss#.', '..#sss1ddddd1sss#.', '..#ssss1ddd1ssss#.', '..#sssss111ssssss#', '...#sssssssssssss#', '....#sssssssss#...', '.....##sssss##....', '.......###........', '..................', '..................'
+  ], pal: { '#': '#2a1a0a', s: 'rgba(180,200,240,0.5)', 1: '#fff', d: '#3a3a5a' }},
+  // Money rain
+  money: { w: 8, h: 8, art: [
+    '#g######', '#gg#####', '#####g#g', '#g#####g', '##g#g###', '#####g##', '#g###g##', '########'
+  ], pal: { '#': '#5aaa3e', g: '#3a7a26' }},
+  // Heart (UR special)
+  heart: { w: 8, h: 7, art: [
+    '.rr.rr..', 'rrrrrrr.', 'rrwwrrr.', 'rwwwwwr.', '.rwwwr..', '..rwr...', '...r....'
+  ], pal: { r: '#ff5a8a', w: '#fff' }},
+  // Cosmic stars
+  stars: { w: 12, h: 8, art: [
+    '.y...yyy...y', 'yyy...y...yyy', '.y...yyy...y', '....y...y...', '..yyy.....yyy', '..y.y.....y.y', '...y.......y.', '............'
+  ], pal: { y: '#ffe066' }},
+};
+
+/* Render accessory as SVG */
+function accToSVG(acc) {
+  const pal = Object.assign({ '.': null, ' ': null }, acc.pal || {});
+  let rects = '';
+  for (let y = 0; y < acc.h; y++) {
+    const row = acc.art[y] || '';
+    for (let x = 0; x < acc.w; x++) {
+      const c = row[x];
+      const col = pal[c];
+      if (col) rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="${col}"/>`;
+    }
+  }
+  return `<svg viewBox="0 0 ${acc.w} ${acc.h}" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">${rects}</svg>`;
+}
+
+/* ============================================================
+   ==== SECTION 5: RARITY DEFINITIONS =======================
+   ============================================================ */
+
+const RARITIES = {
+  N: {
+    label: 'N', name: 'ハズレ犬', weight: 50,
+    color: '#a8b0c0', bannerBg: '#0a0816', se: 'ガチャ…',
+    petPoints: 10,
+    flash: '#a8b0c0',
+    bannerLine: ['ハズレ……', '今日も、こんなもんか。'],
+  },
+  R: {
+    label: 'R', name: 'ちょっとかわいそう犬', weight: 28,
+    color: '#5aa8e8', bannerBg: '#1a3060', se: 'ピコッ',
+    petPoints: 30,
+    flash: '#5aa8e8',
+    bannerLine: ['ちょっと、かわいそう……', 'なんか、共感する。'],
+  },
+  SR: {
+    label: 'SR', name: '人生詰みかけ犬', weight: 14,
+    color: '#b48cf2', bannerBg: '#3a1860', se: 'ピコーン！',
+    petPoints: 60,
+    flash: '#c890f8',
+    bannerLine: ['人生、詰みかけ！', 'これは、ガチで詰んでる……', 'こいつ、闇深い。'],
+  },
+  SSR: {
+    label: 'SSR', name: '伝説のハズレ犬', weight: 6,
+    color: '#ffba33', bannerBg: '#603818', se: 'キラキラ〜！',
+    petPoints: 100,
+    flash: '#ffe066',
+    bannerLine: ['伝説の、ハズレ……！', 'これは、ヤバすぎる', '完全に、行ってる'],
+  },
+  UR: {
+    label: 'UR', name: '逆に当たり犬', weight: 2,
+    color: '#ff5a3a', bannerBg: '#601818', se: 'キラッキラ★',
+    petPoints: 200,
+    flash: '#ff9eb5',
+    bannerLine: ['逆に……当たりじゃん！', 'これは、奇跡', '神犬きた。'],
+  },
+};
+
+/* ============================================================
+   ==== SECTION 6: DOG CATALOG (30+ dogs) ===================
+   ============================================================ */
+
+const DOGS = [
+  // ===== N (ハズレ犬) — 10 =====
+  {
+    id: 'shachiku', name: '社畜柴犬', breed: 'shiba', body: 'standard',
+    rarity: 'N', bgTheme: 'office', accessories: [['tie','center-low'],['sweat','tr']],
+    title: '今週も終わらない',
+    speaker: '▼ しゃちく しばいぬ',
+    intro: '今日も、出社します……。',
+    line: '<span class="hi">仕事辞めたい。</span>でも、おやつ代は欲しい。',
+    subLine: '……月曜って、なんで毎週来るんだろう。',
+    personality: '社畜',
+    dexDesc: '会議3つと残業2時間がデフォルト。それでもおやつには反応する。',
+    share: '社畜柴犬を引いた。共感しかない。',
+  },
+  {
+    id: 'shitsuren', name: '失恋チワワ', breed: 'chihuahua', body: 'standard',
+    rarity: 'N', bgTheme: 'sad', accessories: [['broken_heart','tr']],
+    title: 'あの子は、もう……',
+    speaker: '▼ しつれん ちわわ',
+    intro: 'なんでもないよ……。',
+    line: 'あの子、<span class="hi">結婚するらしい……。</span>',
+    subLine: '元気出して、って言われた。逆に泣ける。',
+    personality: '失恋中',
+    dexDesc: 'インスタを更新する勇気もない。深夜に元恋人の投稿を見てる。',
+    share: '失恋チワワ、感情移入しすぎてしまった。',
+  },
+  {
+    id: 'futsukayoi', name: '二日酔いパグ', breed: 'pug', body: 'flat',
+    rarity: 'N', bgTheme: 'bar', accessories: [['sake','bl'],['sweat','tr']],
+    title: 'もう飲まない（嘘）',
+    speaker: '▼ ふつかよい ぱぐ',
+    intro: 'うっ……あたまが……。',
+    line: '<span class="hi">もう、一生飲まない……</span>（嘘）',
+    subLine: 'ジョッキ3杯、ハイボール5杯、〆のラーメン。覚えてない。',
+    personality: '飲みすぎ',
+    dexDesc: '飲み会の翌日、必ず後悔する。なのに来週もまた飲む。',
+    share: '二日酔いパグ、わたしのことだ。',
+  },
+  {
+    id: 'getsuyou', name: '月曜が来たフレンチブル', breed: 'frenchbull', body: 'flat',
+    rarity: 'N', bgTheme: 'office', accessories: [['anger','tr']],
+    title: 'なんで今週もある',
+    speaker: '▼ げつようがきた ふれぶる',
+    intro: '日曜の夜が……一番つらい。',
+    line: '<span class="hi">また月曜。</span>なんで毎週くるの？',
+    subLine: 'カレンダー作った人を、ちょっとだけ恨んでる。',
+    personality: '月曜恐怖症',
+    dexDesc: '日曜の夜から動悸が止まらない。サザエさんが流れたら終わり。',
+    share: '月曜が来たフレンチブル、月曜の朝に発見される。',
+  },
+  {
+    id: 'taishokuga', name: '退職願を書いたコーギー', breed: 'welshcorgi', body: 'long',
+    rarity: 'N', bgTheme: 'office', accessories: [['resignation','center-low'],['sweat','tr']],
+    title: '提出する勇気が……',
+    speaker: '▼ たいしょくがん こーぎー',
+    intro: 'もう、書いたんだ……。',
+    line: '退職願、書いた。<span class="hi">出せない。</span>',
+    subLine: '給料がなくなる恐怖が、辞めたい気持ちに勝った。',
+    personality: '優柔不断',
+    dexDesc: '机の奥に3枚、家のタンスに5枚ある。一度も出していない。',
+    share: '退職願を書いたコーギー、わたしの机の引き出しにも同じものがある。',
+  },
+  {
+    id: 'yachin', name: '家賃払えないサモエド', breed: 'samoyed', body: 'fluffy',
+    rarity: 'N', bgTheme: 'sad', accessories: [['wallet','bl'],['sweat','tr']],
+    title: '今月もキツい',
+    speaker: '▼ やちんが はらえない さもえど',
+    intro: 'たすけて……。',
+    line: '<span class="hi">今月の家賃、</span>無理かもしれない……。',
+    subLine: 'コンビニのおにぎりで生きてる。',
+    personality: '金欠',
+    dexDesc: '家計簿アプリを開かなくなって3ヶ月。見たら多分泣く。',
+    share: '家賃払えないサモエド、わたしのリアル。',
+  },
+  {
+    id: 'kidoku', name: '既読スルーされたビーグル', breed: 'beagle', body: 'floppy',
+    rarity: 'N', bgTheme: 'sad', accessories: [['phone','tl'],['broken_heart','tr']],
+    title: 'もう一回送る勇気……',
+    speaker: '▼ きどくむし びーぐる',
+    intro: '別に、気にしてないけど……。',
+    line: '送ってから<span class="hi">3時間。</span>まだ既読つかない。',
+    subLine: '消そうかな……いや、待とう……いや、消そう……。',
+    personality: '気にしすぎ',
+    dexDesc: '送ったメッセージを30回読み返してる。文末のスタンプは正解だったか？',
+    share: '既読スルーされたビーグル、心臓に刺さる。',
+  },
+  {
+    id: 'nebo', name: '寝坊した豆柴', breed: 'mameshiba', body: 'standard',
+    rarity: 'N', bgTheme: 'dawn', accessories: [['zzz','tl']],
+    title: 'あと5分……',
+    speaker: '▼ ねぼう まめしば',
+    intro: 'ん？もう朝？',
+    line: '<span class="hi">あと5分……</span>いや、あと30分……。',
+    subLine: '目覚まし5個セットしたのに、全部止めた記憶がない。',
+    personality: '睡眠依存',
+    dexDesc: '気合いで起きる派。気合い、足りなかった。',
+    share: '寝坊した豆柴、今朝のわたし。',
+  },
+  {
+    id: 'zandaka', name: 'ATM残高見たくない犬', breed: 'shiba', body: 'standard',
+    rarity: 'N', bgTheme: 'sad', accessories: [['wallet','bl']],
+    title: '明細、見ません',
+    speaker: '▼ ざんだか みたくない いぬ',
+    intro: '見たら、現実になる。',
+    line: '<span class="hi">明細は、</span>見ない。それが平和。',
+    subLine: 'スマホ通知も切った。届かないお金は、無いのと同じ。',
+    personality: '現実逃避',
+    dexDesc: 'クレカの引き落とし日が一番こわい。',
+    share: 'ATM残高見たくない犬、家計の見ないふりの達人。',
+  },
+  {
+    id: 'kozeni', name: 'レジで小銭が出ない犬', breed: 'chihuahua', body: 'standard',
+    rarity: 'N', bgTheme: 'office', accessories: [['sweat','tr']],
+    title: '後ろの人、ごめん……',
+    speaker: '▼ こぜに でない いぬ',
+    intro: 'あれ……あれ……。',
+    line: '<span class="hi">あっ、すいません……</span>もうちょっと……。',
+    subLine: '後ろに行列。財布の小銭入れは、なぜか開かない。',
+    personality: '小心者',
+    dexDesc: 'コンビニで小銭を出すのに30秒かかる。',
+    share: 'レジで小銭が出ない犬、わたしの全人生。',
+  },
+
+  // ===== R (ちょっとかわいそう) — 8 =====
+  {
+    id: 'yamiochi', name: '闇落ちポメラニアン', breed: 'pomeranian', body: 'fluffy',
+    rarity: 'R', bgTheme: 'night', accessories: [['anger','tr']],
+    title: 'もう何も信じない',
+    speaker: '▼ やみおち ぽめ',
+    intro: 'ふん。',
+    line: 'もう、<span class="hi">何も信じない。</span>',
+    subLine: 'かつては素直な犬だった。何が彼をこうさせたのか。',
+    personality: '闇属性',
+    dexDesc: '裏切られすぎて、もう誰も信じない。でも実はおやつには弱い。',
+    share: '闇落ちポメラニアン、過去になにがあったんだ。',
+  },
+  {
+    id: 'kakin', name: '課金で破産した豆柴', breed: 'mameshiba', body: 'standard',
+    rarity: 'R', bgTheme: 'office', accessories: [['phone','tl'],['wallet','bl']],
+    title: '天井までいったのに',
+    speaker: '▼ かきん はさん まめしば',
+    intro: '出ると思ったんだ……。',
+    line: '<span class="hi">天井までいったのに、</span>すり抜けた。',
+    subLine: 'ピックアップ、信じてたのに……。',
+    personality: 'ガチャ廃人',
+    dexDesc: '推しキャラのために月収を溶かす。後悔はしてない（している）。',
+    share: '課金で破産した豆柴、ガチャゲーマー全員の心。',
+  },
+  {
+    id: 'takarakuji', name: '宝くじ外したトイプー', breed: 'toypoodle', body: 'fluffy',
+    rarity: 'R', bgTheme: 'sad', accessories: [['lottery','center-low']],
+    title: '今週も、ダメだった',
+    speaker: '▼ たからくじ はずれ といぷー',
+    intro: 'いや、まだ希望はある！',
+    line: '今週もダメだった……。<span class="hi">来週、来週こそ……。</span>',
+    subLine: '宝くじ売り場で「当たるかな」と思うが、20年外し続けてる。',
+    personality: '希望論者',
+    dexDesc: '年末ジャンボ、ロト6、totoBIG。すべてに少額を投じ続ける。',
+    share: '宝くじ外したトイプー、来週もよろしく。',
+  },
+  {
+    id: 'shinya', name: '深夜テンションのマルチーズ', breed: 'maltese', body: 'fluffy',
+    rarity: 'R', bgTheme: 'night', accessories: [['energy','tl']],
+    title: '今、世界が変えられる！',
+    speaker: '▼ しんやてんしょん まるち',
+    intro: 'これ！見て！これ！',
+    line: '<span class="hi">今、なんかいけそう！</span>世界変えられる！',
+    subLine: '翌朝には全て後悔する。SNSの下書きには黒歴史。',
+    personality: '深夜の魔物',
+    dexDesc: '深夜3時に書いた長文ツイートを、朝に消して回る。',
+    share: '深夜テンションのマルチーズ、明日の自分が困る。',
+  },
+  {
+    id: 'guchi', name: '愚痴で5時間使った秋田犬', breed: 'akita', body: 'standard',
+    rarity: 'R', bgTheme: 'bar', accessories: [['sake','bl'],['anger','tr']],
+    title: 'あの人マジで……',
+    speaker: '▼ ぐち しゃちょー あきた',
+    intro: 'いやー、聞いてくれよ……。',
+    line: '<span class="hi">あの上司、マジで……</span>（5時間目）',
+    subLine: '居酒屋の店員さんが何度かおしぼり持ってきた。',
+    personality: '愚痴の天才',
+    dexDesc: '愚痴は3時間目から芸術になる。',
+    share: '愚痴で5時間使った秋田犬、わたしの飲み会まんま。',
+  },
+  {
+    id: 'kenshin', name: '健康診断E判定の犬', breed: 'bulldog', body: 'flat',
+    rarity: 'R', bgTheme: 'sad', accessories: [['phone','tl'],['sweat','tr']],
+    title: '全部E、完全制覇',
+    speaker: '▼ けんしん E はんてい いぬ',
+    intro: '結果、来た。',
+    line: '<span class="hi">全部E。</span>これはこれで、すごくない？',
+    subLine: '医者から電話が3回かかってきた。出てない。',
+    personality: '生活習慣',
+    dexDesc: '夜食と運動不足の集大成。それでも酒は飲む。',
+    share: '健康診断E判定の犬、わたしの健康診断。',
+  },
+  {
+    id: 'remote', name: 'リモート飽きたコーギー', breed: 'corgi', body: 'long',
+    rarity: 'R', bgTheme: 'office', accessories: [['phone','tl'],['zzz','tl']],
+    title: '毎日同じ部屋',
+    speaker: '▼ りもーと あきた こーぎー',
+    intro: 'もう、3年目だよ……。',
+    line: '<span class="hi">毎日同じ部屋。</span>毎日同じパーカー。',
+    subLine: 'カメラオフが許される会議に救われてる。',
+    personality: 'リモート疲れ',
+    dexDesc: '在宅勤務3年目。一番のごちそうはコンビニ弁当。',
+    share: 'リモート飽きたコーギー、リモートワーカー全員。',
+  },
+  {
+    id: 'diet', name: 'ダイエット失敗ゴールデン', breed: 'golden', body: 'floppy',
+    rarity: 'R', bgTheme: 'sad', accessories: [['cake','bl']],
+    title: 'ケーキは別腹',
+    speaker: '▼ だいえっと しっぱい ごーるでん',
+    intro: 'え？太った？',
+    line: '<span class="hi">ケーキは別腹。</span>これが真理。',
+    subLine: 'ジムの会費は5ヶ月連続で払ってる。行ってないけど。',
+    personality: '甘党',
+    dexDesc: '明日からやる、を6ヶ月続けている。',
+    share: 'ダイエット失敗ゴールデン、毎年同じことを言ってる。',
+  },
+
+  // ===== SR (人生詰みかけ) — 6 =====
+  {
+    id: 'hansei', name: '何もしてないのに反省してるゴールデン', breed: 'golden', body: 'floppy',
+    rarity: 'SR', bgTheme: 'sad', accessories: [['sweat','tr']],
+    title: 'ごめんなさい（理由不明）',
+    speaker: '▼ はんせい ごーるでん',
+    intro: 'ごめんなさい……。',
+    line: '<span class="hi">ごめんなさい……</span>（何が？）',
+    subLine: '日本の謝罪文化を体現する犬。',
+    personality: '律儀',
+    dexDesc: '人とぶつかった時に「すみません」と言うタイプ。なんなら向こうがぶつかってきた時も。',
+    share: '何もしてないのに反省してるゴールデン、日本人すぎる。',
+  },
+  {
+    id: 'ishikitakai', name: '意識高い系ボーダーコリー', breed: 'borderc', body: 'standard',
+    rarity: 'SR', bgTheme: 'office', accessories: [['glasses','center-low'],['phone','tl']],
+    title: 'PDCA回そう（回せてない）',
+    speaker: '▼ いしきたかい ぼーだー',
+    intro: 'やあ。PDCAは回してるか？',
+    line: '<span class="hi">PDCA回そう。</span>（回せてない）',
+    subLine: 'Notion使ってるけど、整理することが目的になってる。',
+    personality: '意識高い',
+    dexDesc: 'Slackで「FYI」と「ASAP」を多用する。タスクは溜まってる。',
+    share: '意識高い系ボーダーコリー、職場にいるあの人。',
+  },
+  {
+    id: 'mukashi', name: '「昔はモテた」が口癖のシーズー', breed: 'shihtzu', body: 'fluffy',
+    rarity: 'SR', bgTheme: 'bar', accessories: [['sake','bl']],
+    title: '20年前は、本当に',
+    speaker: '▼ むかしはもてた しーずー',
+    intro: 'いや、信じてないだろ？',
+    line: '<span class="hi">20年前は、</span>マジでモテた。マジで。',
+    subLine: '誰も信じない。でも本人は本気で言ってる。',
+    personality: '回顧厨',
+    dexDesc: '若い頃の写真をスマホの待ち受けにしてる。',
+    share: '「昔はモテた」が口癖のシーズー、わたしの上司まんま。',
+  },
+  {
+    id: 'fukugyo', name: '副業バレた柴犬', breed: 'shiba', body: 'standard',
+    rarity: 'SR', bgTheme: 'office', accessories: [['phone','tl'],['sweat','tr'],['anger','tr']],
+    title: 'あ、これは違くて……',
+    speaker: '▼ ふくぎょう ばれ しばいぬ',
+    intro: 'えっと……あの……。',
+    line: '<span class="hi">あ、これは違くて……</span>趣味で……。',
+    subLine: '会社の懇親会で、知らない人から「あの動画の人ですよね？」と言われた。',
+    personality: 'バレた',
+    dexDesc: 'YouTube収益化したのに、本業の同僚に発見された。',
+    share: '副業バレた柴犬、明日が怖い。',
+  },
+  {
+    id: 'line', name: '親のLINE3週間既読スルーの犬', breed: 'mameshiba', body: 'standard',
+    rarity: 'SR', bgTheme: 'sad', accessories: [['phone','tl']],
+    title: '返さなきゃ（返してない）',
+    speaker: '▼ おやのらいん いぬ',
+    intro: '気まずい……。',
+    line: '<span class="hi">返さなきゃ……</span>明日返す……（3週間目）',
+    subLine: 'もう何をどう返せばいいかわからない。',
+    personality: '気まずい',
+    dexDesc: '親からの「元気？」に、3週間返してない。電話は留守電。',
+    share: '親のLINE3週間既読スルーの犬、母さんごめん。',
+  },
+  {
+    id: 'hikkoshi', name: '引っ越し当日に契約書なくしたコーギー', breed: 'corgi', body: 'long',
+    rarity: 'SR', bgTheme: 'office', accessories: [['resignation','center-low'],['sweat','tr']],
+    title: 'どこいった……',
+    speaker: '▼ ひっこし けいやくしょ こーぎー',
+    intro: 'えっ、ない、ない、ない、ない……。',
+    line: '<span class="hi">どこいった……？</span>確かにここに入れた……。',
+    subLine: '不動産屋からの着信が止まらない。',
+    personality: '紛失癖',
+    dexDesc: '物をなくす天才。鍵、財布、契約書。なくすたびに新しい時代が来る。',
+    share: '引っ越し当日に契約書なくしたコーギー、わたしの先週末。',
+  },
+
+  // ===== SSR (伝説のハズレ) — 4 =====
+  {
+    id: 'yukyu', name: '退職翌日に有給残ってた犬', breed: 'akita', body: 'standard',
+    rarity: 'SSR', bgTheme: 'sad', accessories: [['resignation','center-low'],['sweat','tr']],
+    title: '有給30日、どうしよ',
+    speaker: '▼ ゆうきゅう のこってた いぬ',
+    intro: '辞めた、辞めた、辞めたけど……。',
+    line: '<span class="hi">有給30日、</span>残ってた……。どうしよ……。',
+    subLine: '退職届を出した翌日に判明。撤回もできず、30日分の現金支給もなし。',
+    personality: '伝説の損',
+    dexDesc: '辞める2週間前に「有給ぜんぶ消化してから辞めます」と言える勇気がなかった。',
+    share: '退職翌日に有給残ってた犬、伝説のハズレすぎる。',
+  },
+  {
+    id: 'motenai', name: 'みんなに好かれてるのにモテない犬', breed: 'bulldog', body: 'flat',
+    rarity: 'SSR', bgTheme: 'sad', accessories: [['heart','tr'],['broken_heart','bl']],
+    title: 'なんで、誰も惚れない',
+    speaker: '▼ みんなにすかれる いぬ',
+    intro: '友達は、多いんだ……。',
+    line: 'みんな「<span class="hi">いい子だね</span>」って言うんだ……。',
+    subLine: '告白した瞬間、向こうの表情が固まるのが見える。',
+    personality: 'いい人',
+    dexDesc: '恋愛相談はよく受ける。なぜか自分の番は来ない。',
+    share: 'みんなに好かれてるのにモテない犬、刺さりすぎる。',
+  },
+  {
+    id: 'tenshoku5', name: '5回転職した柴犬', breed: 'shiba', body: 'standard',
+    rarity: 'SSR', bgTheme: 'office', accessories: [['tie','center-low'],['resignation','tl']],
+    title: 'もう辞めグセついた',
+    speaker: '▼ てんしょく ごかいめ しばいぬ',
+    intro: 'またか、って言わないで。',
+    line: '<span class="hi">辞めグセついた。</span>ヤバい。',
+    subLine: '面接で「短期間で転職を繰り返してますが」と言われる回数：12回。',
+    personality: '飛ぶ鳥',
+    dexDesc: 'いつかは安定したい。いつかは。多分。',
+    share: '5回転職した柴犬、わたしの未来。',
+  },
+  {
+    id: 'shakkin', name: '借金苦の伝説豆柴', breed: 'mameshiba', body: 'standard',
+    rarity: 'SSR', bgTheme: 'night', accessories: [['wallet','bl'],['anger','tr']],
+    title: 'リボ払いは、宇宙旅行',
+    speaker: '▼ しゃっきん まめしば',
+    intro: '実質、月3万。',
+    line: '<span class="hi">リボ払い、</span>宇宙旅行みたいなもん。',
+    subLine: '元本がなぜか減らない不思議な金融商品に出会った。',
+    personality: '金融弱者',
+    dexDesc: '金利という概念に勝てない。',
+    share: '借金苦の伝説豆柴、リボ払いは罠。',
+  },
+
+  // ===== UR (逆に当たり) — 2 =====
+  {
+    id: 'uchu', name: '宇宙を見たダックス', breed: 'dachshund', body: 'long',
+    rarity: 'UR', bgTheme: 'space', accessories: [['space_helmet','tr'],['stars','center']],
+    title: '全て、繋がっていた……',
+    speaker: '▼ うちゅうをみた だっくす',
+    intro: '我々は、何者か……。',
+    line: '<span class="hi">すべては、ひとつだった。</span>',
+    subLine: 'ある日突然、宇宙の真理を理解してしまった犬。家族は心配している。',
+    personality: '超越者',
+    dexDesc: '会話の途中で「ところで、君はどこから来たんだい？」と聞いてくる。',
+    share: '宇宙を見たダックス引いた！UR！',
+  },
+  {
+    id: 'satori', name: '悟りを開いたパグ仙人', breed: 'pug', body: 'flat',
+    rarity: 'UR', bgTheme: 'space', accessories: [['halo','tl'],['stars','center']],
+    title: 'それも、また人生',
+    speaker: '▼ さとりをひらいた ぱぐ',
+    intro: 'ふむ、来たな。',
+    line: '<span class="hi">ふむ。それも、また人生。</span>',
+    subLine: '何があっても動じない。実は何も考えてないだけかもしれない。',
+    personality: '仙人',
+    dexDesc: '相談すると深そうな顔で頷くが、実は寝ている。',
+    share: '悟りを開いたパグ仙人引いた！URきた！',
+  },
+];
+
+/* ============================================================
+   ==== SECTION 7: GAME STATE + STORAGE =====================
+   ============================================================ */
+
+const STORAGE_KEY = 'hazureDogGachaV2';
+const COST_SINGLE = 100;
+const COST_TEN = 900;
+const DAILY_BONUS = 500;
+
+function defaultState() {
+  return {
+    coins: 3000,
+    petPoints: 0,
+    dex: {},                  // {dogId: {count, affection}}
+    lastDogId: null,
+    totalPulls: 0,
+    lastDailyDate: null,      // YYYY-MM-DD
+    streak: 0,
+    unlockedLimited: {},      // {limitedId: true}
+  };
+}
+
+let state = loadState();
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? { ...defaultState(), ...JSON.parse(raw) } : defaultState();
+  } catch (e) { return defaultState(); }
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+/* ============================================================
+   ==== SECTION 8: GACHA LOGIC ==============================
+   ============================================================ */
+
+function pickRarity() {
+  const total = Object.values(RARITIES).reduce((s, r) => s + r.weight, 0);
+  const roll = Math.random() * total;
+  let acc = 0;
+  for (const [key, def] of Object.entries(RARITIES)) {
+    acc += def.weight;
+    if (roll < acc) return key;
+  }
+  return 'N';
+}
+
+function rollOnce() {
+  const rarity = pickRarity();
+  const pool = DOGS.filter(d => d.rarity === rarity);
+  if (pool.length === 0) return DOGS[0];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function recordDog(dog) {
+  let isDupe = false;
+  if (!state.dex[dog.id]) {
+    state.dex[dog.id] = { count: 0, affection: 0 };
+  } else {
+    isDupe = true;
+  }
+  state.dex[dog.id].count++;
+  state.dex[dog.id].affection = Math.min(5, state.dex[dog.id].affection + 1);
+  state.lastDogId = dog.id;
+  state.totalPulls++;
+  if (isDupe) {
+    const pts = RARITIES[dog.rarity].petPoints;
+    state.petPoints += pts;
+  }
+  return { isDupe, petPoints: isDupe ? RARITIES[dog.rarity].petPoints : 0 };
+}
+
+/* Sort dogs by rarity for "showcase" pick */
+const RARITY_ORDER = ['UR','SSR','SR','R','N'];
+function pickShowcase(arr) {
+  return arr.slice().sort((a,b) => RARITY_ORDER.indexOf(a.rarity) - RARITY_ORDER.indexOf(b.rarity))[0];
+}
+
+/* ============================================================
+   ==== SECTION 9: RENDERERS ================================
+   ============================================================ */
+
+/* Render dog into a frame element. Preserves machine + flash siblings. */
+function renderDogInto(frameEl, dog, opts = {}) {
+  // Remove only previous dog visuals (keep machine + flash intact)
+  frameEl.querySelectorAll('svg.dog-art, .fx-overlay').forEach(n => n.remove());
+  frameEl.setAttribute('data-bg', dog.bgTheme || '');
+  const pal = buildPalette(BREEDS[dog.breed] || {});
+  const grid = BODIES[dog.body] || BODIES.standard;
+  const svgStr = gridToSVG(grid, pal);
+  const wrap = document.createElement('div');
+  wrap.innerHTML = svgStr;
+  const svg = wrap.firstChild;
+  svg.classList.add('dog-art');
+  if (opts.noAnim) svg.style.animation = 'none';
+  frameEl.appendChild(svg);
+
+  // Add accessories
+  if (dog.accessories) {
+    for (const [accKey, pos] of dog.accessories) {
+      const acc = ACC[accKey];
+      if (!acc) continue;
+      const overlay = document.createElement('div');
+      overlay.className = 'fx-overlay float ' + posClass(pos);
+      const sizes = { tl: 28, tr: 28, bl: 28, br: 28, 'center-low': 36, center: 60 };
+      const sz = sizes[pos] || 28;
+      overlay.style.width = sz + 'px';
+      overlay.style.height = (sz * acc.h / acc.w) + 'px';
+      // position-low/center adjustments
+      if (pos === 'center-low') {
+        overlay.style.bottom = '14%';
+        overlay.style.left = '50%';
+        overlay.style.transform = 'translateX(-50%)';
+      } else if (pos === 'center') {
+        overlay.style.top = '20%';
+        overlay.style.left = '50%';
+        overlay.style.transform = 'translateX(-50%)';
+        overlay.style.opacity = '0.65';
+      }
+      overlay.innerHTML = accToSVG(acc);
+      frameEl.appendChild(overlay);
+    }
+  }
+}
+
+function posClass(pos) {
+  if (['tl','tr','bl','br'].includes(pos)) return pos;
+  return '';
+}
+
+function renderRarityStrip(rarity, stripEl) {
+  const r = RARITIES[rarity];
+  stripEl.style.background = r.color;
+  stripEl.style.color = '#fff';
+  stripEl.innerHTML = `<span class="star">★</span> ${r.label}・${r.name} <span class="star">★</span>`;
+}
+
+function renderHUD() {
+  document.getElementById('coinVal').textContent = state.coins.toLocaleString();
+  document.getElementById('dexVal').textContent = Object.keys(state.dex).length;
+  document.getElementById('petVal').textContent = state.petPoints.toLocaleString();
+  updateActionButtons();
+}
+
+function updateActionButtons() {
+  document.getElementById('pull1Btn').disabled = state.coins < COST_SINGLE;
+  document.getElementById('pull10Btn').disabled = state.coins < COST_TEN;
+  const claimed = state.lastDailyDate === todayStr();
+  const dailyBtn = document.getElementById('dailyBtn');
+  dailyBtn.disabled = claimed;
+  document.getElementById('dailyLabel').textContent = claimed ? '済' : `+${DAILY_BONUS}`;
+}
+
+function showWelcome() {
+  document.getElementById('machine').style.display = 'block';
+  document.getElementById('namePlate').innerHTML = `<span id="dogName">─── ガチャを引いてね ───</span>`;
+  document.getElementById('breedTag').textContent = '▼ さあ、人生に疲れた犬に会いに行こう';
+  document.getElementById('rarityStrip').innerHTML = `<span class="star">★</span> ハズレずかんへようこそ <span class="star">★</span>`;
+  document.getElementById('rarityStrip').style.background = '#1a3060';
+  document.getElementById('dialogSpeaker').textContent = '▼ おしらせ';
+  document.getElementById('dialogText').innerHTML = `いらっしゃい！<span class="hi">「ハズレ犬」</span>ばかりが集まる<br>ちょっと変なガチャマシンへ。`;
+  document.getElementById('dialogSub').textContent = '───── 何故か愛着が湧く犬たち ─────';
+}
+
+function showDogInUI(dog) {
+  const frame = document.getElementById('dogFrame');
+  // Hide machine
+  const machine = document.getElementById('machine');
+  if (machine) machine.style.display = 'none';
+  // Render dog
+  renderDogInto(frame, dog);
+  document.getElementById('namePlate').innerHTML = `<span id="dogName">${dog.name}</span>`;
+  document.getElementById('breedTag').textContent = `▼ 性格：${dog.personality}　犬種：${BREED_LABELS[dog.breed] || dog.breed}`;
+  renderRarityStrip(dog.rarity, document.getElementById('rarityStrip'));
+  document.getElementById('dialogSpeaker').textContent = dog.speaker;
+  document.getElementById('dialogText').innerHTML = dog.line;
+  document.getElementById('dialogSub').textContent = `「${dog.subLine}」`;
+}
+
+const BREED_LABELS = {
+  shiba: '柴犬', mameshiba: '豆柴', blackshiba: '黒柴',
+  chihuahua: 'チワワ', pug: 'パグ', bulldog: 'ブルドッグ',
+  frenchbull: 'フレブル', corgi: 'コーギー', welshcorgi: 'ウェルシュコーギー',
+  samoyed: 'サモエド', beagle: 'ビーグル', golden: 'ゴールデン',
+  pomeranian: 'ポメラニアン', toypoodle: 'トイプー', borderc: 'ボーダーコリー',
+  shihtzu: 'シーズー', dachshund: 'ダックス', akita: '秋田犬', maltese: 'マルチーズ',
+};
+
+/* Dex grid */
+function renderDexGrid() {
+  const grid = document.getElementById('dexGrid');
+  grid.innerHTML = '';
+  DOGS.forEach(dog => {
+    const seen = state.dex[dog.id];
+    const cell = document.createElement('div');
+    cell.className = 'dex-cell' + (seen ? ` found r-${dog.rarity}` : ' locked');
+    const pal = buildPalette(BREEDS[dog.breed] || {});
+    const grid32 = BODIES[dog.body] || BODIES.standard;
+    cell.innerHTML = `
+      <span class="dex-rarity ${dog.rarity}">${RARITIES[dog.rarity].label}</span>
+      ${seen ? `<span class="dex-count">x${seen.count}</span>` : ''}
+      <div class="dex-art">${gridToSVG(grid32, pal)}</div>
+      <div class="dex-name">${seen ? dog.name : '???'}</div>
+    `;
+    if (seen) cell.addEventListener('click', () => openDetail(dog));
+    grid.appendChild(cell);
+  });
+  const total = DOGS.length;
+  const got = Object.keys(state.dex).length;
+  document.getElementById('dexCount').textContent = got;
+  document.getElementById('dexPct').textContent = Math.round(got/total*100) + '%';
+}
+
+function openDetail(dog) {
+  const seen = state.dex[dog.id] || { count: 0, affection: 0 };
+  document.getElementById('detailTitle').textContent = dog.name;
+  renderDogInto(document.getElementById('detailFrame'), dog);
+  renderRarityStrip(dog.rarity, document.getElementById('detailRarity'));
+  const hearts = '❤'.repeat(seen.affection) + '·'.repeat(5 - seen.affection);
+  document.getElementById('detailInfo').innerHTML = `
+    <div><b>性格：</b>${dog.personality}　<b>犬種：</b>${BREED_LABELS[dog.breed] || dog.breed}</div>
+    <div style="margin-top:4px;"><b>セリフ：</b>「${dog.line.replace(/<[^>]+>/g,'')}」</div>
+    <div style="margin-top:4px;"><b>解説：</b>${dog.dexDesc}</div>
+    <div style="margin-top:4px;"><b>なつき度：</b>${hearts}　<b>出会った：</b>${seen.count}回</div>
+  `;
+  detailDog = dog;
+  show('detailModal');
+}
+let detailDog = null;
+
+/* ============================================================
+   ==== SECTION 10: ANIMATIONS / FX =========================
+   ============================================================ */
+
+function showSEText(text, parent) {
+  parent = parent || document.querySelector('.stage');
+  const el = document.createElement('div');
+  el.className = 'se-text';
+  el.textContent = text;
+  el.style.left = '50%';
+  el.style.top = '38%';
+  parent.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
+
+function spawnSparkles(centerEl) {
+  const rect = centerEl.getBoundingClientRect();
+  const stage = document.querySelector('.stage').getBoundingClientRect();
+  const cx = rect.left - stage.left + rect.width / 2;
+  const cy = rect.top - stage.top + rect.height / 2;
+  for (let i = 0; i < 10; i++) {
+    setTimeout(() => {
+      const sp = document.createElement('div');
+      sp.className = 'sparkle';
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 40 + Math.random() * 80;
+      sp.style.left = (cx + Math.cos(angle) * dist) + 'px';
+      sp.style.top = (cy + Math.sin(angle) * dist) + 'px';
+      document.querySelector('.stage').appendChild(sp);
+      setTimeout(() => sp.remove(), 900);
+    }, i * 40);
+  }
+}
+
+function showBanner(text) {
+  const b = document.getElementById('banner');
+  b.textContent = text;
+  b.classList.remove('show');
+  void b.offsetWidth;
+  b.classList.add('show');
+}
+
+function flashRarity(rarity) {
+  const flash = document.getElementById('flash');
+  flash.style.setProperty('--flash', RARITIES[rarity].flash);
+  flash.classList.remove('show');
+  void flash.offsetWidth;
+  flash.classList.add('show');
+}
+
+/* Full gacha pull animation */
+function playGachaSequence(dog) {
+  return new Promise(resolve => {
+    const machine = document.getElementById('machine');
+    const frame = document.getElementById('dogFrame');
+    machine.style.display = 'block';
+    machine.classList.add('shake');
+    showSEText('ガチャ…', frame);
+
+    setTimeout(() => {
+      machine.classList.remove('shake');
+      machine.style.display = 'none';
+      flashRarity(dog.rarity);
+      showSEText(RARITIES[dog.rarity].se, frame);
+      setTimeout(() => {
+        showDogInUI(dog);
+        spawnSparkles(frame);
+        const lines = RARITIES[dog.rarity].bannerLine;
+        showBanner(lines[Math.floor(Math.random() * lines.length)]);
+        resolve();
+      }, 350);
+    }, 700);
+  });
+}
+
+/* ============================================================
+   ==== SECTION 11: ACTIONS / HANDLERS ======================
+   ============================================================ */
+
+async function onPullOne() {
+  if (state.coins < COST_SINGLE) { toast('コインが足りないワン……'); return; }
+  state.coins -= COST_SINGLE;
+  const dog = rollOnce();
+  const { isDupe, petPoints } = recordDog(dog);
+  saveState();
+  renderHUD();
+  await playGachaSequence(dog);
+  if (isDupe) toast(`ダブり！なでなで +${petPoints}pt`);
+  renderHUD();
+}
+
+async function onPullTen() {
+  if (state.coins < COST_TEN) { toast('コインが足りないワン……'); return; }
+  state.coins -= COST_TEN;
+  const results = [];
+  let totalDupePts = 0;
+  let newCount = 0;
+  for (let i = 0; i < 10; i++) {
+    const dog = rollOnce();
+    const { isDupe, petPoints } = recordDog(dog);
+    if (isDupe) totalDupePts += petPoints; else newCount++;
+    results.push(dog);
+  }
+  saveState();
+  renderHUD();
+  const showcase = pickShowcase(results);
+  await playGachaSequence(showcase);
+  showTenResult(results, totalDupePts, newCount);
+  renderHUD();
+}
+
+function showTenResult(results, dupePts, newCount) {
+  const grid = document.getElementById('tenGrid');
+  grid.innerHTML = '';
+  const hasUR = results.some(d => d.rarity === 'UR');
+  const hasSSR = results.some(d => d.rarity === 'SSR');
+  const hasHazureish = results.filter(d => d.rarity === 'N').length;
+  document.getElementById('tenSub').textContent =
+    hasUR  ? '逆に当たり、混じってる……！' :
+    hasSSR ? '伝説のハズレ、出ました！' :
+    (hasHazureish >= 7) ? 'ハズレだらけ。それでいい。' :
+                          'みんな、なんか愛しい。';
+
+  results.forEach((dog, i) => {
+    const cell = document.createElement('div');
+    cell.className = `dex-cell found r-${dog.rarity}`;
+    cell.style.animation = `cellPop 0.4s steps(3) ${i*60}ms backwards`;
+    const pal = buildPalette(BREEDS[dog.breed] || {});
+    const grid32 = BODIES[dog.body] || BODIES.standard;
+    cell.innerHTML = `
+      <span class="dex-rarity ${dog.rarity}">${RARITIES[dog.rarity].label}</span>
+      <div class="dex-art">${gridToSVG(grid32, pal)}</div>
+      <div class="dex-name">${dog.name}</div>
+    `;
+    grid.appendChild(cell);
+  });
+
+  show('tenModal');
+  if (dupePts > 0) setTimeout(() => toast(`ダブり合計 なでなで +${dupePts}pt`), 400);
+}
+
+function onClaimDaily() {
+  const today = todayStr();
+  if (state.lastDailyDate === today) { toast('今日はもう受け取りました'); return; }
+  // Streak logic
+  const yesterday = (() => { const d = new Date(); d.setDate(d.getDate()-1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+  state.streak = (state.lastDailyDate === yesterday) ? (state.streak + 1) : 1;
+  state.lastDailyDate = today;
+  const bonus = DAILY_BONUS + (state.streak >= 7 ? 200 : 0);
+  state.coins += bonus;
+  saveState();
+  document.getElementById('dailyAmount').textContent = `+${bonus}¥`;
+  document.getElementById('streakNum').textContent = state.streak;
+  document.getElementById('dailyMsg').textContent = state.streak >= 7
+    ? '7日連続ボーナスです🌟'
+    : (state.streak >= 3 ? '連続ログイン、最高！' : '明日も会いに来てね！');
+  showSEText('ピコーン！', document.querySelector('.stage'));
+  renderHUD();
+}
+
+function onOpenDaily() {
+  document.getElementById('dailyAmount').textContent = `+${DAILY_BONUS}¥`;
+  document.getElementById('streakNum').textContent = state.streak;
+  const claimed = state.lastDailyDate === todayStr();
+  document.getElementById('claimDailyBtn').disabled = claimed;
+  document.getElementById('claimDailyBtn').textContent = claimed ? '受取り済み' : '▶ うけとる';
+  document.getElementById('dailyMsg').textContent = claimed ? '明日また来てね！' : '明日も会いに来てね！';
+  show('dailyModal');
+}
+
+/* Shop */
+const LIMITED_DOGS = [
+  {
+    id: 'lim_satori', name: '人生3周目の老犬', breed: 'shiba', body: 'standard',
+    rarity: 'UR', cost: 1500, bgTheme: 'space',
+    accessories: [['halo','tl'],['glasses','center-low']],
+    title: 'もう、何も驚かない',
+    speaker: '▼ じんせい3しゅうめ',
+    intro: 'やあ、また会ったね。',
+    line: '<span class="hi">もう、何も驚かない。</span>全部見た。',
+    subLine: '転生3回目。次は何になるかは選べない。',
+    personality: '達観',
+    dexDesc: 'なでなでポイントで解放できる限定犬。3周目を生きる達人。',
+    share: '限定犬「人生3周目の老犬」を解放した。',
+  },
+  {
+    id: 'lim_zenbu', name: '全部わかってるブルドッグ', breed: 'bulldog', body: 'flat',
+    rarity: 'SSR', cost: 800, bgTheme: 'night',
+    accessories: [['glasses','center-low']],
+    title: '全部、わかってる',
+    speaker: '▼ ぜんぶわかってる ぶる',
+    intro: 'まあ、君のことは、わかるよ。',
+    line: '<span class="hi">全部わかってる。</span>君のことも。',
+    subLine: '何も言わない。でも全部見抜いてる。',
+    personality: '見抜き屋',
+    dexDesc: '何も言わずに笑う。それが一番こわい。',
+    share: '限定犬「全部わかってるブルドッグ」を解放！',
+  },
+];
+
+function openShop() {
+  document.getElementById('shopPetPts').textContent = state.petPoints.toLocaleString();
+  const list = document.getElementById('shopList');
+  list.innerHTML = '';
+  LIMITED_DOGS.forEach(dog => {
+    const unlocked = !!state.unlockedLimited[dog.id];
+    const pal = buildPalette(BREEDS[dog.breed] || {});
+    const grid32 = BODIES[dog.body] || BODIES.standard;
+    const item = document.createElement('div');
+    item.className = 'shop-item' + (unlocked ? '' : '');
+    item.innerHTML = `
+      <div class="shop-art">${gridToSVG(grid32, pal)}</div>
+      <div class="shop-info">
+        <div class="nm">${dog.name} <span style="color:#${RARITIES[dog.rarity].color.slice(1)};font-size:10px;">[${dog.rarity}]</span></div>
+        <div class="ds">${dog.dexDesc}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        <div class="shop-cost">${dog.cost}pt</div>
+        <button class="pix-btn ${unlocked ? 'green' : (state.petPoints >= dog.cost ? 'gold' : 'blue')} shop-buy" data-id="${dog.id}" ${unlocked || state.petPoints < dog.cost ? 'disabled' : ''}>${unlocked ? '解放済' : '解放する'}</button>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+  list.querySelectorAll('.shop-buy').forEach(btn => {
+    btn.addEventListener('click', () => unlockLimited(btn.dataset.id));
+  });
+  show('shopModal');
+}
+
+function unlockLimited(id) {
+  const dog = LIMITED_DOGS.find(d => d.id === id);
+  if (!dog || state.unlockedLimited[id]) return;
+  if (state.petPoints < dog.cost) { toast('なでなでポイントが足りません'); return; }
+  state.petPoints -= dog.cost;
+  state.unlockedLimited[id] = true;
+  // Add to dex
+  recordDog(dog);
+  // Push into DOGS array so future renders find it
+  if (!DOGS.find(d => d.id === dog.id)) DOGS.push(dog);
+  saveState();
+  renderHUD();
+  hide('shopModal');
+  playGachaSequence(dog).then(() => {
+    showBanner(`限定犬「${dog.name}」を解放！`);
+  });
+}
+
+/* Share */
+function onShare() {
+  if (!detailDog) return;
+  const text = `${detailDog.share}\n\n#ハズレ犬ガチャ #${detailDog.name}`;
+  if (navigator.share) {
+    navigator.share({ text }).catch(() => copyShare(text));
+  } else {
+    copyShare(text);
+  }
+}
+function copyShare(text) {
+  navigator.clipboard?.writeText(text).then(
+    () => toast('共有テキストをコピーしました'),
+    () => toast(text)
+  );
+}
+
+/* Modal show/hide */
+function show(id) { document.getElementById(id).hidden = false; }
+function hide(id) { document.getElementById(id).hidden = true; }
+
+/* Toast */
+let toastTimer = null;
+function toast(text) {
+  let el = document.querySelector('.toast');
+  if (el) el.remove();
+  el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = text;
+  document.body.appendChild(el);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.remove(), 2600);
+}
+
+/* ============================================================
+   ==== INIT ==============================================
+   ============================================================ */
+
+function bind() {
+  document.getElementById('pull1Btn').addEventListener('click', onPullOne);
+  document.getElementById('pull10Btn').addEventListener('click', onPullTen);
+  document.getElementById('dailyBtn').addEventListener('click', onOpenDaily);
+  document.getElementById('claimDailyBtn').addEventListener('click', onClaimDaily);
+  document.getElementById('dexBtn').addEventListener('click', () => { renderDexGrid(); show('dexModal'); });
+  document.getElementById('closeDexBtn').addEventListener('click', () => hide('dexModal'));
+  document.getElementById('shopBtn').addEventListener('click', openShop);
+  document.getElementById('closeShopBtn').addEventListener('click', () => hide('shopModal'));
+  document.getElementById('closeDetailBtn').addEventListener('click', () => hide('detailModal'));
+  document.getElementById('shareBtn').addEventListener('click', onShare);
+  document.getElementById('closeTenBtn').addEventListener('click', () => hide('tenModal'));
+  document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.hidden = true; });
+  });
+  document.addEventListener('contextmenu', e => e.preventDefault());
+}
+
+function init() {
+  // Merge limited dogs already unlocked into DOGS for rendering
+  LIMITED_DOGS.forEach(d => {
+    if (state.unlockedLimited[d.id] && !DOGS.find(x => x.id === d.id)) DOGS.push(d);
+  });
+
+  // Add cellPop keyframes via JS (used by 10-pull cells)
+  const sheet = document.styleSheets[0];
+  try {
+    sheet.insertRule(`@keyframes cellPop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }`, 0);
+  } catch (e) {}
+
+  bind();
+  renderHUD();
+  if (state.lastDogId) {
+    const dog = DOGS.find(d => d.id === state.lastDogId);
+    if (dog) showDogInUI(dog);
+    else showWelcome();
+  } else {
+    showWelcome();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+</script>
+</body>
+</html>
