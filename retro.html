@@ -933,30 +933,32 @@ const BODIES = {
    ==== SECTION 3: BREED PALETTES ===========================
    ============================================================ */
 
-// PS1-era 3-tone shading per breed.
-// 1 = shadow, 2 = base, 3 = light. 4 = cream mask, 5 = cream shadow, 6 = cream light.
-// Override 'e' eye iris per breed for color variation if desired.
+// Chiikawa-style SVG palette per breed.
+// main = body color, shade = subtle shading, mask = optional face mask, ear = inner ear color, accent = optional spot
 const BREEDS = {
-  shiba:        { 1: '#8a5028', 2: '#d48848', 3: '#f4c084', 4: '#fff5e0', 5: '#e0c898', 6: '#fffcef' },
-  mameshiba:    { 1: '#a06030', 2: '#e89e58', 3: '#ffd49a', 4: '#fffaee', 5: '#e8d4ae', 6: '#fff' },
-  blackshiba:   { 1: '#1a1208', 2: '#3a2818', 3: '#5a4030', 4: '#d4a878', 5: '#a87848', 6: '#e8c098' },
-  chihuahua:    { 1: '#a07840', 2: '#e8c084', 3: '#ffe0b0', 4: '#fff8e8', 5: '#e8d8b8', 6: '#fff', e: '#3a2810' },
-  pug:          { 1: '#6a3818', 2: '#b88858', 3: '#e8c890', 4: '#3a1f0a', 5: '#1a0a04', 6: '#5a3818' },
-  bulldog:      { 1: '#a07848', 2: '#e8c498', 3: '#fff0d4', 4: '#fff', 5: '#d8c8a8', 6: '#fff' },
-  frenchbull:   { 1: '#403830', 2: '#7a6e60', 3: '#a89880', 4: '#fff5e0', 5: '#c8b89a', 6: '#fff' },
-  corgi:        { 1: '#9a5818', 2: '#e89058', 3: '#ffb878', 4: '#fff5e0', 5: '#e8cca8', 6: '#fff' },
-  samoyed:      { 1: '#c8c0b0', 2: '#fff', 3: '#fff', 4: '#fff', 5: '#e8e0d0', 6: '#fff', n: '#1a0a04' },
-  beagle:       { 1: '#1a0a04', 2: '#3a2418', 3: '#a06038', 4: '#fff5e0', 5: '#d8b890', 6: '#fff', 7: '#a06030' },
-  golden:       { 1: '#a87838', 2: '#f4c074', 3: '#ffd498', 4: '#fff8e0', 5: '#e8d4ae', 6: '#fff' },
-  pomeranian:   { 1: '#a85820', 2: '#f0a048', 3: '#ffc878', 4: '#fff5d4', 5: '#e8d098', 6: '#fff' },
-  toypoodle:    { 1: '#9a7048', 2: '#d4b088', 3: '#f4d4b0', 4: '#fff8e0', 5: '#e8d8b8', 6: '#fff' },
-  borderc:      { 1: '#000', 2: '#1a1818', 3: '#3a3838', 4: '#fff', 5: '#d8d4d0', 6: '#fff' },
-  shihtzu:      { 1: '#7a5828', 2: '#c8a070', 3: '#e8c898', 4: '#fff8e0', 5: '#e8d4b0', 6: '#fff' },
-  dachshund:    { 1: '#3a1808', 2: '#7a3818', 3: '#a85828', 4: '#f4d4a8', 5: '#d4a878', 6: '#ffd4a0' },
-  akita:        { 1: '#9a6838', 2: '#e8b878', 3: '#ffd8a0', 4: '#fff8e0', 5: '#e8d4ae', 6: '#fff' },
-  maltese:      { 1: '#c8c0a8', 2: '#fff8e8', 3: '#fff', 4: '#fff', 5: '#e8e0c8', 6: '#fff', n: '#1a0a04' },
-  welshcorgi:   { 1: '#7a3818', 2: '#d47828', 3: '#ffa858', 4: '#fff5e0', 5: '#e8cca8', 6: '#fff' },
+  shiba:        { main: '#f4dcc0', shade: '#e0c498', mask: '#fff8ec' },
+  mameshiba:    { main: '#fce8c8', shade: '#e8d4a8', mask: '#fff8ec' },
+  blackshiba:   { main: '#3a2418', shade: '#1a1208', mask: '#d4a878' },
+  chihuahua:    { main: '#fce0c0', shade: '#e8c4a0', mask: '#fff5e8' },
+  pug:          { main: '#fce0bc', shade: '#dcc098', mask: '#3a2418', maskOnFace: true },
+  bulldog:      { main: '#fff5e0', shade: '#e8d8c0' },
+  frenchbull:   { main: '#a89888', shade: '#7a6e60', mask: '#fff5e0', maskOnFace: true },
+  corgi:        { main: '#f4c498', shade: '#dca878', mask: '#fff8e0' },
+  samoyed:      { main: '#ffffff', shade: '#e8e0d0' },
+  beagle:       { main: '#dca878', shade: '#a87848', mask: '#fff8e8', spot: '#3a2418' },
+  golden:       { main: '#f8e0a8', shade: '#e0c890', mask: '#fff8e0' },
+  pomeranian:   { main: '#fcb86c', shade: '#e89c48', mask: '#fff5d4' },
+  toypoodle:    { main: '#f0dcb8', shade: '#dcc498', mask: '#fff8e0' },
+  borderc:      { main: '#1a1818', shade: '#000', mask: '#ffffff', maskOnFace: true },
+  shihtzu:      { main: '#e8d4a8', shade: '#c8a878', mask: '#fff8e0' },
+  dachshund:    { main: '#a8643c', shade: '#783c20', mask: '#f4d4a8' },
+  akita:        { main: '#f8d4a0', shade: '#e0bc80', mask: '#fff8e0' },
+  maltese:      { main: '#ffffff', shade: '#e8e0c8' },
+  welshcorgi:   { main: '#dc8838', shade: '#a85818', mask: '#fff5e0' },
 };
+
+const OUTLINE = '#3a2418';
+const STROKE  = 2.5;
 
 /* ============================================================
    ==== SECTION 4: ACCESSORY SPRITES (small overlays) =======
@@ -1561,18 +1563,128 @@ function pickShowcase(arr) {
    ==== SECTION 9: RENDERERS ================================
    ============================================================ */
 
+/* Generate smooth SVG dog illustration (Chiikawa-style).
+   100x100 viewBox. Body type sets ears + body shape; breed sets colors.        */
+function svgDog(dog) {
+  const b = BREEDS[dog.breed] || BREEDS.shiba;
+  const body = dog.body || 'standard';
+  const main = b.main, shade = b.shade || b.main, mask = b.mask;
+  const earInner = '#ff9ec4';
+  const noseColor = '#1a1208';
+
+  // ======= EARS =======
+  let ears = '';
+  switch (body) {
+    case 'standard': // upright pointed
+      ears = `
+        <path d="M 22 24 L 17 6 L 33 22 Z" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}" stroke-linejoin="round"/>
+        <path d="M 78 24 L 83 6 L 67 22 Z" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}" stroke-linejoin="round"/>
+        <path d="M 24 21 L 22 11 L 30 21 Z" fill="${earInner}"/>
+        <path d="M 76 21 L 78 11 L 70 21 Z" fill="${earInner}"/>`;
+      break;
+    case 'floppy': // long droopy
+      ears = `
+        <path d="M 24 26 Q 8 32 14 50 Q 24 56 32 42 Z" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}" stroke-linejoin="round"/>
+        <path d="M 76 26 Q 92 32 86 50 Q 76 56 68 42 Z" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}" stroke-linejoin="round"/>`;
+      break;
+    case 'fluffy': // tiny fluffy bumps
+      ears = `
+        <circle cx="28" cy="22" r="7" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}"/>
+        <circle cx="72" cy="22" r="7" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}"/>`;
+      break;
+    case 'flat': // tiny pug ears
+      ears = `
+        <path d="M 28 20 Q 18 18 22 32 Q 30 30 32 25 Z" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}" stroke-linejoin="round"/>
+        <path d="M 72 20 Q 82 18 78 32 Q 70 30 68 25 Z" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}" stroke-linejoin="round"/>`;
+      break;
+    case 'long': // medium tilted
+      ears = `
+        <ellipse cx="22" cy="30" rx="6" ry="13" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}" transform="rotate(-18 22 30)"/>
+        <ellipse cx="78" cy="30" rx="6" ry="13" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}" transform="rotate(18 78 30)"/>`;
+      break;
+  }
+
+  // ======= BODY =======
+  let bodyShape;
+  if (body === 'long') {
+    bodyShape = `<ellipse cx="50" cy="78" rx="38" ry="16" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}"/>`;
+  } else if (body === 'fluffy') {
+    bodyShape = `<ellipse cx="50" cy="76" rx="34" ry="20" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}"/>`;
+  } else if (body === 'flat') {
+    bodyShape = `<ellipse cx="50" cy="78" rx="32" ry="18" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}"/>`;
+  } else {
+    bodyShape = `<ellipse cx="50" cy="78" rx="30" ry="18" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}"/>`;
+  }
+
+  // Small feet hint
+  const feet = `
+    <ellipse cx="38" cy="92" rx="5" ry="3.5" fill="${shade}" stroke="${OUTLINE}" stroke-width="2"/>
+    <ellipse cx="62" cy="92" rx="5" ry="3.5" fill="${shade}" stroke="${OUTLINE}" stroke-width="2"/>`;
+
+  // ======= HEAD =======
+  const head = `<circle cx="50" cy="48" r="28" fill="${main}" stroke="${OUTLINE}" stroke-width="${STROKE}"/>`;
+
+  // ======= FACE MASK (optional cream/dark snout area) =======
+  let face = '';
+  if (mask) {
+    // Pug/Frenchie style: dark mask on whole face area
+    if (b.maskOnFace) {
+      face = `<ellipse cx="50" cy="56" rx="17" ry="11" fill="${mask}"/>`;
+    } else {
+      // Standard: cream snout/cheeks
+      face = `<ellipse cx="50" cy="58" rx="16" ry="10" fill="${mask}"/>`;
+    }
+  }
+
+  // Optional spot/mark on face (beagle etc.)
+  let spot = '';
+  if (b.spot) {
+    spot = `<ellipse cx="32" cy="42" rx="6" ry="5" fill="${b.spot}" opacity="0.85"/>`;
+  }
+
+  // ======= BIG ANIME EYES =======
+  // Black eye base + white sparkle (Chiikawa style)
+  const eyes = `
+    <ellipse cx="40" cy="50" rx="4.2" ry="5" fill="#1a0e08"/>
+    <ellipse cx="60" cy="50" rx="4.2" ry="5" fill="#1a0e08"/>
+    <circle cx="41.5" cy="48" r="1.6" fill="#fff"/>
+    <circle cx="61.5" cy="48" r="1.6" fill="#fff"/>
+    <circle cx="38.5" cy="51.5" r="0.8" fill="#fff" opacity="0.7"/>
+    <circle cx="58.5" cy="51.5" r="0.8" fill="#fff" opacity="0.7"/>`;
+
+  // ======= CHEEK BLUSH =======
+  const blush = `
+    <ellipse cx="32" cy="58" rx="4" ry="2.5" fill="#ffa8c4" opacity="0.65"/>
+    <ellipse cx="68" cy="58" rx="4" ry="2.5" fill="#ffa8c4" opacity="0.65"/>`;
+
+  // ======= NOSE =======
+  const nose = `<path d="M 47.5 58 Q 50 60.5 52.5 58 Q 50 61 47.5 58 Z" fill="${noseColor}"/>`;
+
+  // ======= MOUTH (w shape) =======
+  const mouth = `<path d="M 45 62 Q 47 65 50 62 Q 53 65 55 62" stroke="${OUTLINE}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+
+  return `<svg class="dog-art" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+    ${bodyShape}
+    ${feet}
+    ${ears}
+    ${head}
+    ${face}
+    ${spot}
+    ${eyes}
+    ${blush}
+    ${nose}
+    ${mouth}
+  </svg>`;
+}
+
 /* Render dog into a frame element. Preserves machine + flash siblings. */
 function renderDogInto(frameEl, dog, opts = {}) {
   // Remove only previous dog visuals (keep machine + flash intact)
   frameEl.querySelectorAll('svg.dog-art, .fx-overlay').forEach(n => n.remove());
   frameEl.setAttribute('data-bg', dog.bgTheme || '');
-  const pal = buildPalette(BREEDS[dog.breed] || {});
-  const grid = BODIES[dog.body] || BODIES.standard;
-  const svgStr = gridToSVG(grid, pal);
   const wrap = document.createElement('div');
-  wrap.innerHTML = svgStr;
+  wrap.innerHTML = svgDog(dog);
   const svg = wrap.firstChild;
-  svg.classList.add('dog-art');
   if (opts.noAnim) svg.style.animation = 'none';
   frameEl.appendChild(svg);
 
@@ -1675,12 +1787,10 @@ function renderDexGrid() {
     const seen = state.dex[dog.id];
     const cell = document.createElement('div');
     cell.className = 'dex-cell' + (seen ? ` found r-${dog.rarity}` : ' locked');
-    const pal = buildPalette(BREEDS[dog.breed] || {});
-    const grid32 = BODIES[dog.body] || BODIES.standard;
     cell.innerHTML = `
       <span class="dex-rarity ${dog.rarity}">${RARITIES[dog.rarity].label}</span>
       ${seen ? `<span class="dex-count">x${seen.count}</span>` : ''}
-      <div class="dex-art">${gridToSVG(grid32, pal)}</div>
+      <div class="dex-art">${svgDog(dog)}</div>
       <div class="dex-name">${seen ? dog.name : '???'}</div>
     `;
     if (seen) cell.addEventListener('click', () => openDetail(dog));
@@ -1836,11 +1946,9 @@ function showTenResult(results, dupePts, newCount) {
     const cell = document.createElement('div');
     cell.className = `dex-cell found r-${dog.rarity}`;
     cell.style.animation = `cellPop 0.4s steps(3) ${i*60}ms backwards`;
-    const pal = buildPalette(BREEDS[dog.breed] || {});
-    const grid32 = BODIES[dog.body] || BODIES.standard;
     cell.innerHTML = `
       <span class="dex-rarity ${dog.rarity}">${RARITIES[dog.rarity].label}</span>
-      <div class="dex-art">${gridToSVG(grid32, pal)}</div>
+      <div class="dex-art">${svgDog(dog)}</div>
       <div class="dex-name">${dog.name}</div>
     `;
     grid.appendChild(cell);
@@ -1915,12 +2023,10 @@ function openShop() {
   list.innerHTML = '';
   LIMITED_DOGS.forEach(dog => {
     const unlocked = !!state.unlockedLimited[dog.id];
-    const pal = buildPalette(BREEDS[dog.breed] || {});
-    const grid32 = BODIES[dog.body] || BODIES.standard;
     const item = document.createElement('div');
     item.className = 'shop-item' + (unlocked ? '' : '');
     item.innerHTML = `
-      <div class="shop-art">${gridToSVG(grid32, pal)}</div>
+      <div class="shop-art">${svgDog(dog)}</div>
       <div class="shop-info">
         <div class="nm">${dog.name} <span style="color:#${RARITIES[dog.rarity].color.slice(1)};font-size:10px;">[${dog.rarity}]</span></div>
         <div class="ds">${dog.dexDesc}</div>
