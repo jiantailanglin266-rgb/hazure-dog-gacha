@@ -61,31 +61,38 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 
 /* ============================================================
-   RPG WINDOW — PS1-era navy gradient + cyan inset border
+   WINDOW — Chiikawa-style soft pastel cream + pink border
    ============================================================ */
 .rpg-window {
-  background: linear-gradient(180deg, #1a1a48 0%, #0a0820 100%);
-  color: #fff;
-  border: 2px solid #6acce8;
-  outline: 2px solid #0a0820; outline-offset: -4px;
+  background: linear-gradient(180deg, #fff8ee 0%, #ffe8e0 100%);
+  color: #5a3a3a;
+  border: 3px solid #f4a8c0;
+  outline: 2px solid #fff4ee; outline-offset: -5px;
   position: relative; font-family: 'DotGothic16', monospace; line-height: 1.3;
-  box-shadow: inset 0 0 0 1px rgba(168,224,255,0.18), 0 2px 4px rgba(0,0,0,0.4);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.6),
+    0 3px 0 #f4a8c0,
+    0 5px 8px rgba(244,168,192,0.3);
 }
 .rpg-window.amber {
-  background: linear-gradient(180deg, #ffe888 0%, #c47018 100%);
-  color: #3a1a0a; border-color: #ffd040; outline-color: #884028;
+  background: linear-gradient(180deg, #fff8d4 0%, #ffe098 100%);
+  color: #6a4818; border-color: #e8b860; outline-color: #fff8e0;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7), 0 3px 0 #c89540, 0 5px 8px rgba(232,184,96,0.3);
 }
 .rpg-window.pink  {
-  background: linear-gradient(180deg, #ff8aae 0%, #c43868 100%);
-  color: #fff; border-color: #ffd0e0; outline-color: #884028;
+  background: linear-gradient(180deg, #ffd0e0 0%, #ffb0c8 100%);
+  color: #882044; border-color: #ff7aa4; outline-color: #fff0f4;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7), 0 3px 0 #c43868, 0 5px 8px rgba(255,122,164,0.3);
 }
 .rpg-window.blue  {
-  background: linear-gradient(180deg, #4080d0 0%, #1a3068 100%);
-  color: #fff; border-color: #a8d4f8; outline-color: #0a1024;
+  background: linear-gradient(180deg, #d8eef8 0%, #a8d4ec 100%);
+  color: #1a4068; border-color: #6cc0e8; outline-color: #f0f8fc;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7), 0 3px 0 #3e8ac4, 0 5px 8px rgba(108,192,232,0.3);
 }
 .rpg-window.gold  {
-  background: linear-gradient(180deg, #ffe066 0%, #c47a18 100%);
-  color: #3a1a0a; border-color: #ffd040; outline-color: #884028;
+  background: linear-gradient(180deg, #fff8c8 0%, #ffd870 100%);
+  color: #6a4818; border-color: #e8b840; outline-color: #fff8e0;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7), 0 3px 0 #c89540, 0 5px 8px rgba(232,184,64,0.3);
 }
 
 /* ============================================================
@@ -100,18 +107,18 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .hud .chip.ptbg .ico { background: #ff9ec4; color: #882044; }
 .hud .chip.dxbg .ico { background: #a8d8ec; color: #2050a0; }
-.hud .num { color: #fff5d4; font-weight: 700; font-size: 12px; }
-.hud .amber .num { color: #2a1a0a; }
+.hud .num { color: #5a3a3a; font-weight: 700; font-size: 12px; }
+.hud .amber .num { color: #6a4818; }
+.hud .pink .num { color: #882044; }
+.hud .blue .num { color: #1a4068; }
 
 .title-strip {
   text-align: center; padding: 4px 0 6px; z-index: 6;
-  font-family: 'DotGothic16', monospace; color: #fff;
+  font-family: 'DotGothic16', monospace; color: #ff7aa4;
   font-size: 20px; font-weight: 700; letter-spacing: 0.06em;
   text-shadow:
-    2px 2px 0 #2a1a4a,
-    -1px -1px 0 #ff5a8a, 1px -1px 0 #ff5a8a, -1px 1px 0 #ff5a8a, 1px 1px 0 #ff5a8a,
-    0 0 12px rgba(255,180,220,0.7),
-    0 0 4px rgba(255,255,255,0.9);
+    -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff,
+    0 0 12px rgba(255,255,255,0.9);
 }
 .dialog-name {
   color: #ffe066; font-size: 11px; margin-bottom: 4px;
@@ -208,11 +215,15 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* Name plate */
 .name-plate {
-  padding: 3px 12px; font-size: 13px; text-align: center;
-  background: #0a0816; color: #fff; border: 2px solid #fff;
-  outline: 2px solid #0a0816; outline-offset: -4px; margin-top: 2px;
+  padding: 4px 14px; font-size: 13px; text-align: center; font-weight: 700;
+  background: linear-gradient(180deg, #fff 0%, #ffe8ee 100%);
+  color: #5a3a3a;
+  border: 2px solid #ff7aa4;
+  outline: 2px solid #fff; outline-offset: -4px;
+  margin-top: 4px;
+  box-shadow: 0 2px 0 #c43868;
 }
-.breed-tag { font-size: 10px; color: #ffe066; margin-top: 4px; letter-spacing: 0.05em; }
+.breed-tag { font-size: 10px; color: #886848; margin-top: 8px; letter-spacing: 0.05em; font-weight: 700; }
 
 /* ============================================================
    DIALOG BOX
@@ -221,10 +232,10 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   padding: 8px 12px 8px; font-size: 13px; line-height: 1.45; min-height: 58px;
   margin-bottom: 6px; position: relative;
 }
-.dialog-name { color: #ffe066; font-size: 11px; margin-bottom: 4px; }
-.dialog-text { color: #fff; }
-.dialog-text .hi { color: #ff9eb5; }
-.dialog-sub { color: #a0a0c0; font-size: 11px; margin-top: 3px; }
+.dialog-name { color: #c47018; font-size: 11px; margin-bottom: 4px; font-weight: 700; }
+.dialog-text { color: #5a3a3a; }
+.dialog-text .hi { color: #e84878; font-weight: 700; }
+.dialog-sub { color: #886868; font-size: 11px; margin-top: 3px; }
 .dialog-cursor {
   position: absolute; bottom: 6px; right: 10px; width: 10px; height: 10px;
   background: #ffe066; clip-path: polygon(0 0, 100% 0, 50% 100%);
@@ -321,17 +332,21 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
 .modal[hidden] { display: none; }
 .modal-card {
-  background: #0a0816; color: #fff; border: 3px solid #fff;
-  outline: 3px solid #0a0816; outline-offset: -6px;
+  background: linear-gradient(180deg, #fff8ee 0%, #ffe8e0 100%);
+  color: #5a3a3a;
+  border: 3px solid #ff7aa4;
+  outline: 2px solid #fff4ee; outline-offset: -5px;
   width: 100%; max-width: 420px; max-height: 88vh;
   display: flex; flex-direction: column; padding: 14px 12px 12px;
+  box-shadow: 0 4px 0 #c43868, 0 8px 16px rgba(0,0,0,0.25);
 }
 .modal-title {
-  text-align: center; font-size: 16px; color: #ffe066;
-  margin-bottom: 4px; letter-spacing: 0.06em;
+  text-align: center; font-size: 16px; color: #c43868;
+  margin-bottom: 4px; letter-spacing: 0.06em; font-weight: 700;
+  text-shadow: 1px 1px 0 #fff;
 }
 .modal-sub {
-  text-align: center; font-size: 11px; color: #a0a0c0; margin-bottom: 8px;
+  text-align: center; font-size: 11px; color: #886868; margin-bottom: 8px; font-weight: 700;
 }
 .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
 .modal-actions .pix-btn { flex: 1; font-size: 13px; padding: 8px 4px 10px; }
@@ -353,12 +368,13 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   padding: 2px; font-size: 8px; color: #fff; cursor: pointer; position: relative;
   font-family: 'DotGothic16', monospace;
 }
-.dex-cell.found.r-N      { background: #3a4050; border-color: #a8b0c0; }
-.dex-cell.found.r-R      { background: #2a4060; border-color: #5aa8e8; }
-.dex-cell.found.r-SR     { background: #503060; border-color: #b48cf2; }
-.dex-cell.found.r-SSR    { background: #604020; border-color: #ffc14d; }
-.dex-cell.found.r-UR     { background: #602020; border-color: #ff5a3a; box-shadow: 0 0 0 1px #ffe066 inset; }
-.dex-cell.locked { color: #5a4a68; }
+.dex-cell { background: #fff5e8; color: #5a3a3a; }
+.dex-cell.found.r-N      { background: #f4f0e8; border-color: #b8a8a0; }
+.dex-cell.found.r-R      { background: #e0eef8; border-color: #6cc0e8; }
+.dex-cell.found.r-SR     { background: #f0e0f8; border-color: #c890e8; }
+.dex-cell.found.r-SSR    { background: #fff0c8; border-color: #ffba33; }
+.dex-cell.found.r-UR     { background: #ffe0d8; border-color: #ff5a3a; box-shadow: 0 0 0 1px #ffe066 inset; }
+.dex-cell.locked { background: #f0e8e0; color: #b8a8a0; border-color: #d8c8c0; }
 .dex-cell .dex-art {
   width: 32px; height: 32px; image-rendering: pixelated; margin-bottom: 1px;
 }
